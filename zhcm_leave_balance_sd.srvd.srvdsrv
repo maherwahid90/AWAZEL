@@ -1,0 +1,6 @@
+@EndUserText.label: 'Service Definition for Leave Balance'
+define service Zhcm_leave_balance_sd {
+  expose zhcm_i_leave_balance;
+  expose zhcm_i_leave_balance_it;
+  expose zhcm_quotas;
+}

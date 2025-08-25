@@ -1,0 +1,31 @@
+ @Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Balance Details',
+                     typeNamePlural: 'Balance Details',
+                     title: { type: #STANDARD, value: 'Datum' } } }
+annotate entity zhcm_i_leave_balance_it
+    with 
+{
+@UI.facet: [ { id:            'Balance',
+                 purpose:       #STANDARD,
+                 type:          #IDENTIFICATION_REFERENCE,
+                 label:         'Balance Details',
+                 position:      10 } ]
+                 
+                 @UI.hidden: true
+Quonr;
+@UI.hidden: true
+Docnr;
+  @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],identification: [ { position: 10 } ] 
+         }
+         @EndUserText.label: 'Leave Date'
+Datum;
+@UI.hidden: true
+Pernr;
+  @UI: { lineItem:       [ { position: 20, importance: #HIGH } ],identification: [ { position: 20 } ] 
+         }
+         @EndUserText.label: 'Leave Type'
+awart;
+@UI.hidden: true
+atext;
+    
+}

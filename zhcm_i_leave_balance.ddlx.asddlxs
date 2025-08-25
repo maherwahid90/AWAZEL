@@ -1,0 +1,75 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Leave Balance', 
+                     typeNamePlural: 'Leave Balance', 
+                     title: { type: #STANDARD, value: 'Ktext' } ,
+                     description: {
+                     value: 'ename'
+        },typeImageUrl: 'sap-icon://time-off'
+        },
+                     
+       presentationVariant: [{ sortOrder: [{ by: 'begda', direction: #DESC }] }] }
+annotate entity zhcm_i_leave_balance
+    with 
+{
+
+@UI.facet: [ { 
+                purpose:       #STANDARD,
+                type:          #IDENTIFICATION_REFERENCE,
+                label:         'Balance',
+                position:      10},
+                
+              { id:            'Balance',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Leave Dates',
+                position:      20,
+                targetElement: '_Leaves'}]
+                
+                @UI: { lineItem:       [ { position: 10, importance: #HIGH } ] ,
+         identification: [ { position: 10 } ] }
+  @EndUserText.label: 'Employee'
+    pernr;
+                    @UI: { lineItem:       [ { position: 20, importance: #HIGH } ] ,
+         identification: [ { position: 20 } ], 
+         selectionField: [ { position: 10 } ] }
+  @EndUserText.label: 'Begin Date'
+    begda;
+                        @UI: { lineItem:       [ { position: 30, importance: #HIGH } ] ,
+         identification: [ { position: 30 } ], 
+         selectionField: [ { position: 20 } ] }
+  @EndUserText.label: 'End Date'
+    endda;
+                           @UI: { lineItem:       [ { position: 40, importance: #HIGH } ] ,
+         identification: [ { position: 40 } ], 
+         selectionField: [ { position: 30 } ] }
+  @EndUserText.label: 'Quota Type'
+    ktart;
+    @UI.hidden: true
+    quonr;
+    @UI.hidden: true
+    Ktext;
+    @UI.hidden: true
+    ename;
+                               @UI: { lineItem:       [ { position: 50, importance: #HIGH } ] ,
+         identification: [ { position: 50 } ]}
+  @EndUserText.label: 'Deduction Begin Date'
+    desta;
+                                   @UI: { lineItem:       [ { position: 60, importance: #HIGH } ] ,
+         identification: [ { position: 60 } ]}
+  @EndUserText.label: 'Deduction End Date'
+    deend;
+                                       @UI: { lineItem:       [ { position: 70, importance: #HIGH } ] ,
+         identification: [ { position: 70 } ]}
+  @EndUserText.label: 'Balance'
+    anzhl;
+                                       @UI: { lineItem:       [ { position: 80, importance: #HIGH } ] ,
+         identification: [ { position: 80 } ]}
+  @EndUserText.label: 'Deducted Balance'
+    kverb;
+                                       @UI: { lineItem:       [ { position: 90, importance: #HIGH } ] ,
+         identification: [ { position: 90 } ]}
+  @EndUserText.label: 'Rest Balance'
+    rest;
+
+    
+}

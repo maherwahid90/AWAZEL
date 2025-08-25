@@ -1,0 +1,118 @@
+managed implementation in class zbp_hcm_i_over unique;
+strict ( 2 );
+
+with draft;
+define behavior for zhcm_i_OVER alias OVER
+persistent table Zhcm_OVERT_req
+with additional save
+draft table zhcm_dr_OVER
+lock master
+total etag LastChangedAt
+authorization master ( instance )
+etag master LocalLastChangedAt
+{
+  create;
+  update(features : instance);
+  delete(features : instance);
+  association _Attachment { create;with draft; }
+  association _Approval { create;with draft; }
+ // internal action recalculateAbsence;
+  //internal action recalculateBalance;
+  determination setRequestNumber on save { create; }
+ // determination calculateAbsence on modify { create; field Awart, Begda,Endda; }
+ // determination calculateBalance on modify { create; field Awart;}
+//  side effects
+//  {
+//    field Awart  affects field Kaltg,field Abwtg,field entitle,field deduct, field pendingreq, field rest;
+//    field Begda  affects field Kaltg,field Abwtg;
+//    field Endda  affects field Kaltg,field Abwtg;
+//  }
+  validation validateDates on save { create; field Begda; }
+  field ( mandatory) Pernr,Begda,emp_anzhl;
+  field ( numbering : managed, readonly ) RequestUuid;
+  field ( readonly ) LocalLastChangedAt,LocalCreatedAt,manager_anzhl_h;
+   field ( features : instance ) Pernr,manger_anzhl,hiredate,PlansTxt,OrgehTxt,RequestId,emp_anzhl,begda;
+  draft determine action Prepare{}
+ draft action resume;
+ draft action Edit;
+ draft action Activate optimized;
+ draft action Discard;
+
+  mapping for zhcm_overt_req{
+ RequestUuid = request_uuid;
+    RequestId = request_id;
+    Pernr = pernr ;
+    hiredate = hire_date;
+
+    Begda = begda;
+    emp_anzhl = emp_anzhl;
+    manger_anzhl = manger_anzhl;
+    Remarks=remarks ;
+    ReqStatus= req_status;
+    LocalCreatedBy=local_created_by;
+
+    LocalCreatedAt=local_created_at ;
+    LocalLastChangedBy = local_last_changed_by;
+    LocalLastChangedAt = local_last_changed_at;
+    LastChangedAt=last_changed_at ;
+  }
+
+}
+
+define behavior for zhcm_i_OVER_att alias _Attachment
+persistent table Zhcm_OV_attach
+draft table zhcm_dr_OV_at
+lock dependent by _OVER
+authorization dependent by _OVER
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+  field ( mandatory ) Attachment;
+  field ( readonly ) RequestUuid;
+  field ( readonly ) LocalLastChangedAt,LocalCreatedAt;
+  association _OVER {with draft;}
+  field (numbering : managed,readonly) AttachmentUuid;
+  mapping for zhcm_ov_attach{
+
+AttachmentUuid = attachment_uuid ;
+   RequestUuid =  request_uuid ;
+    Attachment = attachment ;
+    Mimetype = mimetype;
+    Filename = filename;
+    Comments = comments;
+        LocalCreatedBy=local_created_by;
+
+    LocalCreatedAt=local_created_at ;
+    LocalLastChangedBy = local_last_changed_by;
+    LocalLastChangedAt = local_last_changed_at;
+    LastChangedAt=last_changed_at ;
+
+  }
+}
+
+
+define behavior for zhcm_i_OVER_approvals alias _Approval
+persistent table zhcm_ov_approv
+draft table zhcm_dr_OV_aps
+lock dependent by _OVER
+authorization dependent by _OVER
+etag master ReceiveTs
+{
+  update(features : instance);
+  delete(features : instance);
+  field ( readonly ) RequestUuid,ApprovalSeq;
+  association _OVER {with draft;}
+  mapping for zhcm_OV_approv{
+
+   RequestUuid =  request_uuid ;
+    ApprovalSeq = approval_seq ;
+    ApprovalPernr = approval_pernr;
+    ApprovalName = approval_name;
+    ReceiveTs = receive_ts;
+    CompleteTs = complete_ts;
+    Status = status;
+   ApprovalComment = approval_comment;
+
+  }
+}
