@@ -1,0 +1,18 @@
+CLASS zhcm_tf_class DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_amdp_marker_hdb .
+*    class-METHODS :get_emp_quota for TABLE FUNCTION ZHCM_EMP_Quota.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zhcm_tf_class IMPLEMENTATION.
+*
+ENDCLASS.

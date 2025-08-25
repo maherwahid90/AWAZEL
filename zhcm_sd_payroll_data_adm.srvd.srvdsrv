@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Definition for Payroll Data Adin'
+define service Zhcm_sd_payroll_data_adm {
+  expose ZHCM_C_PAYROLL_DATA_adm;
+}
