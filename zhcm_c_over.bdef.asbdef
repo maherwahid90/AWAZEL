@@ -1,0 +1,35 @@
+projection implementation in class zbp_hcm_c_OVER unique;
+strict ( 2 );
+use draft;
+
+define behavior for zhcm_c_OVER alias OVER
+{
+  use create(augment);
+  use update;
+  use delete;
+
+  use action Prepare;
+  use action resume;
+  use action Edit;
+  use action Activate;
+  use action Discard;
+
+  use association _Attachment { create; with draft; }
+  use association _Approval { create; with draft; }
+}
+
+define behavior for zhcm_c_OVER_approvals //alias <alias_name>
+{
+  //use update;
+ // use delete;
+
+  use association _OVER { with draft; }
+}
+
+define behavior for zhcm_c_OVER_att //alias <alias_name>
+{
+  use update;
+  use delete;
+
+  use association _OVER { with draft; }
+}

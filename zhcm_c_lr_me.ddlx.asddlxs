@@ -1,0 +1,181 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Leave Request', 
+                     typeNamePlural: 'Leave Requests', 
+                     title: { type: #STANDARD, value: 'Atext' } ,
+                     description: {
+                     value: 'RequestId'
+        },typeImageUrl: 'sap-icon://time-off'
+        },
+                     
+       presentationVariant: [{ sortOrder: [{ by: 'RequestId', direction: #DESC }] }] }
+       
+annotate entity zhcm_c_lr
+    with 
+{
+
+@UI.facet: [
+   {
+          label: 'Employee Data',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 10,
+          targetQualifier: 'SubtEmp'
+      },
+      {
+          label: 'Request Status',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 20,
+          targetQualifier: 'ReqStatus'
+      },
+      {
+    targetQualifier: 'REST',
+    targetElement: 'REST',
+    type: #DATAPOINT_REFERENCE,
+    purpose: #HEADER
+  },
+  { id:            'LeaveRequest',
+                purpose:       #STANDARD,
+                type:          #COLLECTION,
+                label:         'Leave Request',
+                position:      10 },
+       { id:            'EmployeeData',
+                purpose:       #STANDARD,
+                type:          #IDENTIFICATION_REFERENCE,
+                label:         'Employee Data',
+                parentId: 'LeaveRequest',
+                position:      10 },
+                       { 
+                purpose:       #STANDARD,
+                type:          #FIELDGROUP_REFERENCE,
+                label:         'Leave Data',
+                parentId: 'LeaveRequest',
+                position:      20,
+                targetQualifier: 'LeaveData' },
+                                       { 
+                purpose:       #STANDARD,
+                type:          #FIELDGROUP_REFERENCE,
+                label:         'Balance',
+                parentId: 'LeaveRequest',
+                position:      30,
+                targetQualifier: 'BalanceData' },
+                
+              { id:            'Attachment',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Attachment',
+                position:      20,
+                targetElement: '_Attachment'},
+                
+                { id:            'Approval',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Approvals',
+                position:      30,
+                targetElement: '_Approval'}
+  ]
+
+
+  @UI.hidden: true
+    RequestUuid;
+@UI: { lineItem:       [ { position: 10, importance: #HIGH } ] ,
+         identification: [ { position: 10 } ], 
+         selectionField: [ { position: 10 } ] }
+  @EndUserText.label: 'Request No'
+    RequestId;
+    @UI: { lineItem:       [ { position: 20,  importance: #HIGH } ] ,
+         identification: [ { position: 20 } ] }
+        @EndUserText.label: 'Employee'
+        @UI.dataPoint: { qualifier: 'SubtEmp',title: 'Employee Name'}
+    Pernr;
+     @UI.identification: [{ position: 30 }]
+     @EndUserText.label: 'Position'
+    PlansTxt;
+    @UI.identification: [{ position: 40 }]
+    @EndUserText.label: 'Department'
+    OrgehTxt;
+    
+    @UI.identification: [{ position: 50 }]
+    @EndUserText.label: 'Hire Date'
+    hiredate;
+    @UI: { lineItem:       [ { position: 30, importance: #HIGH } ] ,
+          
+         selectionField: [ { position: 30 } ] }
+          @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 10 }]
+          @EndUserText.label: 'Leave type'
+    Awart;
+    @UI: { lineItem:       [ { position: 40, importance: #HIGH } ] ,
+         
+         selectionField: [ { position: 40 } ] }
+         @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 20 }]
+         @EndUserText.label: 'Start Date'
+    Begda;
+    @UI: { lineItem:       [ { position: 50, importance: #HIGH } ] ,
+         
+         selectionField: [ { position: 50 } ] }
+         @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 30 }]
+         @EndUserText.label: 'End Date'
+    Endda;
+    @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 40 }]
+    @EndUserText.label: 'Absence Days'
+    Abwtg;
+    @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 50 }]
+    @EndUserText.label: 'Calendar Days'
+    Kaltg;
+      @UI: { lineItem:       [ { position: 60, importance: #HIGH } ] 
+         
+          }
+         @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 70 }]
+         @EndUserText.label: 'Remarks'
+         @UI.multiLineText: true
+    Remarks;
+      @UI: { lineItem:       [ { position: 70, importance: #HIGH } ] ,
+         
+         selectionField: [ { position: 70 } ] }
+         
+         @UI.fieldGroup: [{ qualifier: 'LeaveData', position: 60 }]
+         @EndUserText.label: 'Replacement'
+         SubtEmp;
+               @UI: { 
+         
+         selectionField: [ { position: 80 } ] }
+         @EndUserText.label: 'Status'
+    ReqStatus;
+    @UI: { lineItem:       [ { position: 80, importance: #HIGH ,criticality: 'statusCriticality'} ]}
+    @UI.dataPoint: { qualifier: 'ReqStatus',title: 'Request Status',criticality: 'statusCriticality'}
+    @EndUserText.label: 'Status'
+    ReqStatusText;
+    @UI.fieldGroup: [{ qualifier: 'BalanceData', position: 10 }]
+    @EndUserText.label: 'Balance Leave'
+    entitle;
+    @UI.fieldGroup: [{ qualifier: 'BalanceData', position: 20 }]
+    @EndUserText.label: 'Balance Deducted'
+    deduct;
+    @UI.fieldGroup: [{ qualifier: 'BalanceData', position: 30 }]
+    @EndUserText.label: 'Pending Requests Balance'
+    pendingreq;
+    @UI.dataPoint: {
+  title: 'Rest of Balance',
+  description: '{@i18n>SubTitle}',
+  targetValue: 150,
+  //criticality: 'Criticality ',
+  visualization: #PROGRESS
+}
+@UI.fieldGroup: [{ qualifier: 'BalanceData', position: 40 }]
+@EndUserText.label: 'Balance Rest'
+    rest;
+    @UI.hidden: true
+    LocalCreatedBy;
+    @UI.identification: [{  position: 60}]
+    LocalCreatedAt;
+    @UI.hidden: true
+    LocalLastChangedBy;
+    
+    @UI.identification: [{  position: 70}]
+    LocalLastChangedAt;
+    @UI.hidden: true
+    LastChangedAt;
+    /* Associations */
+   // _Attachment;
+    
+}

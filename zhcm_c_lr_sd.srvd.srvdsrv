@@ -1,0 +1,8 @@
+@EndUserText.label: 'Service Definition for LEave Request'
+define service Zhcm_c_lr_sd {
+  expose zhcm_c_lr;
+  expose zhcm_c_lr_att;
+  expose zhcm_c_lr_approvals;
+  expose zhcm_absence_types_cds;
+  expose zhcm_employee_help;
+}

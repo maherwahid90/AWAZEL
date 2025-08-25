@@ -1,0 +1,142 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Over Time Request', 
+                     typeNamePlural: 'Over Time Requests', 
+                     title: { type: #STANDARD, value: 'ename' } ,
+                     description: {
+                     value: 'RequestId'
+        },typeImageUrl: 'sap-icon://time-off'
+        },
+                     
+       presentationVariant: [{ sortOrder: [{ by: 'RequestId', direction: #DESC }] }] }
+annotate entity zhcm_c_OVER
+    with 
+{
+    
+@UI.facet: [
+   {
+          label: 'Employee Data',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 10,
+          targetQualifier: 'SubtEmp'
+      },
+      {
+          label: 'Request Status',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 20,
+          targetQualifier: 'ReqStatus'
+      },
+      
+  { id:            'OverRequest',
+                purpose:       #STANDARD,
+                type:          #COLLECTION,
+                label:         'Over Time Request',
+                position:      10 },
+       { id:            'EmployeeData',
+                purpose:       #STANDARD,
+                type:          #IDENTIFICATION_REFERENCE,
+                label:         'Employee Data',
+                parentId: 'OverRequest',
+                position:      10 },
+                       { 
+                purpose:       #STANDARD,
+                type:          #FIELDGROUP_REFERENCE,
+                label:         'Over Time Data',
+                parentId: 'OverRequest',
+                position:      20,
+                targetQualifier: 'OverData' },
+                                      
+                
+              { id:            'Attachment',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Attachment',
+                position:      20,
+                targetElement: '_Attachment'},
+                
+                { id:            'Approval',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Approvals',
+                position:      30,
+                targetElement: '_Approval'}
+  ]
+
+
+  @UI.hidden: true
+    RequestUuid;
+@UI: { lineItem:       [ { position: 10, importance: #HIGH } ] ,
+         identification: [ { position: 10 } ], 
+         selectionField: [ { position: 10 } ] }
+  @EndUserText.label: 'Request No'
+    RequestId;
+    @UI: { lineItem:       [ { position: 20,  importance: #HIGH } ] ,
+         identification: [ { position: 20 } ] }
+        @EndUserText.label: 'Employee'
+        @UI.dataPoint: { qualifier: 'SubtEmp',title: 'Employee Name'}
+    Pernr;
+     @UI.identification: [{ position: 30 }]
+     @EndUserText.label: 'Position'
+    PlansTxt;
+    @UI.identification: [{ position: 40 }]
+    @EndUserText.label: 'Department'
+    OrgehTxt;
+    
+    @UI.identification: [{ position: 50 }]
+    @EndUserText.label: 'Hire Date'
+    hiredate;
+
+    @UI: { lineItem:       [ { position: 40, importance: #HIGH } ] ,
+         
+         selectionField: [ { position: 40 } ] }
+         @UI.fieldGroup: [{ qualifier: 'OverData', position: 10 }]
+         @EndUserText.label: 'Start Date'
+    Begda;
+    
+        @UI: { lineItem:       [ { position: 50, importance: #HIGH } ] ,
+         
+         selectionField: [ { position: 50 } ] }
+         @UI.fieldGroup: [{ qualifier: 'OverData', position: 20 }]
+         @EndUserText.label: 'Over Time Hours Entered By Employee'
+    emp_anzhl;
+    
+            @UI: { lineItem:       [ { position: 60, importance: #HIGH } ,{hidden:#('manager_anzhl_h') }]  }
+         @UI.fieldGroup: [{ qualifier: 'OverData', position: 30 },{hidden:#('manager_anzhl_h') }]
+         @EndUserText.label: 'Over Time Hours Entered By Manager'
+    manger_anzhl;
+//    @UI.hidden: true
+//manager_anzhl_h;
+      @UI: { lineItem:       [ { position: 70, importance: #HIGH } ] 
+         
+          }
+         @UI.fieldGroup: [{ qualifier: 'OverData', position: 40 }]
+         @EndUserText.label: 'Remarks'
+         @UI.multiLineText: true
+    Remarks;
+  
+               @UI: { 
+         
+         selectionField: [ { position: 80 } ] }
+         @EndUserText.label: 'Status'
+    ReqStatus;
+    @UI: { lineItem:       [ { position: 80, importance: #HIGH ,criticality: 'statusCriticality'} ]}
+    @UI.dataPoint: { qualifier: 'ReqStatus',title: 'Request Status',criticality: 'statusCriticality'}
+    @EndUserText.label: 'Status'
+    ReqStatusText;
+  
+    @UI.hidden: true
+    LocalCreatedBy;
+    @UI.identification: [{  position: 60}]
+    LocalCreatedAt;
+    @UI.hidden: true
+    LocalLastChangedBy;
+    
+    @UI.identification: [{  position: 70}]
+    LocalLastChangedAt;
+    @UI.hidden: true
+    LastChangedAt;
+    /* Associations */
+   // _Attachment;
+    
+}

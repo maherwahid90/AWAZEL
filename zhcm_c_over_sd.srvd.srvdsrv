@@ -1,0 +1,7 @@
+@EndUserText.label: 'ZHCM_C_OVER_SD'
+define service ZHCM_C_OVER_SD {
+  expose zhcm_c_OVER;
+  expose zhcm_c_OVER_att;
+  expose zhcm_c_OVER_approvals;
+  expose zhcm_employee_help;
+}

@@ -1,0 +1,44 @@
+@Metadata.layer: #CORE  
+@Search.searchable: true  
+@UI.headerInfo:{  
+typeName: 'Payslip',  
+typeNamePlural: 'Payslips',  
+title:{ type:#STANDARD,  
+label:'Employee' ,  
+value:'pernr'},
+description.value: 'ename'  
+} 
+
+annotate entity ZHCM_C_PAYROLL_DATA_adm
+    with 
+{
+   @UI:{ lineItem: [{ position : 10}],  
+selectionField: [{ position : 10 }],
+identification: [{  position: 10}] } 
+@Search:{ defaultSearchElement: true,  
+fuzzinessThreshold: 0.7 } 
+pernr;  
+@UI:{ lineItem: [{ position : 30}],  
+selectionField: [{ position : 20 }] ,
+identification: [{  position: 20}]}
+@Search:{ defaultSearchElement: true,  
+fuzzinessThreshold: 0.7 } 
+@EndUserText.label:'Period'
+fpper;
+@UI:{ lineItem: [{ position : 40}],
+identification: [{  position: 30}]} 
+@EndUserText.label:'Month'
+month_no;
+@UI:{ lineItem: [{ position : 50}]} 
+@EndUserText.label:'Year'
+year_no; 
+@UI:{ lineItem: [{ position : 60}],  
+selectionField: [{ position : 30 }] } 
+@Search:{ defaultSearchElement: true,  
+fuzzinessThreshold: 0.7 }  
+bukrs; 
+@UI:{  
+lineItem: [{ position : 70, label : 'Print Payslip'}, { type : #WITH_URL, url:'LinkToPdf' }]  
+}  
+ShowPDF;     
+}

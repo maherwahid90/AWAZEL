@@ -1,0 +1,50 @@
+
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Attachment',
+                     typeNamePlural: 'Attachments',
+                     title: { type: #STANDARD, value: 'AttachmentUuid' } } }
+annotate entity zhcm_c_OVER_att
+    with 
+{
+@UI.facet: [ { id:            'Attachment',
+                 purpose:       #STANDARD,
+                 type:          #IDENTIFICATION_REFERENCE,
+                 label:         'Attachment',
+                 position:      10 } ]
+    @UI.hidden: true             
+    AttachmentUuid;
+ 
+     @UI.hidden:true
+    RequestUuid;
+         @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],identification: [ { position: 10 } ] 
+         }
+         @EndUserText.label: 'Attachment'
+         
+    Attachment;
+    @UI.hidden: true
+    Mimetype;
+    @UI.hidden: true
+    Filename;
+    @UI: { lineItem:       [ { position: 20, importance: #HIGH } ],identification: [ { position: 20 } ] 
+         }
+         @EndUserText.label: 'Comment'
+         @UI.multiLineText: true
+    Comments;
+    @UI.hidden: true
+    LocalCreatedBy;
+    @UI: { lineItem:       [ { position: 30, importance: #HIGH } ],identification: [ { position: 30 } ] 
+         }
+         @EndUserText.label: 'Created At'
+    LocalCreatedAt;
+@UI.hidden: true
+    LocalLastChangedBy;
+        @UI: { lineItem:       [ { position: 40, importance: #HIGH } ],identification: [ { position: 40 } ] 
+         }
+         @EndUserText.label: 'Changed At'
+    LocalLastChangedAt;
+    @UI.hidden: true
+    LastChangedAt;
+    /* Associations */
+   // _LR;
+    
+}
