@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZHCM_MSGS</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>HCM Msgs</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>This leave allowed after threee months from the hire data.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>You got Hajj before.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>This Leave allowed after two years from the hire date.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Begin date is greater than End date.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>There is a request confilct with this date range with no( &amp;1 )</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Exam leave is allowed for Saudi only.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>There is a leave saved with in the date range you entered.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>Attachment is required for this Request.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>008</MSGNR>
+     <TEXT>The minimum value of housing allowance for single employee is 750 SAR.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>The minimum value of housing allowance for married employee is 1167 SAR.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>Enter the Mandatory fields.</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>
