@@ -1,0 +1,35 @@
+projection implementation in class zbp_hcm_c_lr unique;
+strict ( 2 );
+use draft;
+use side effects;
+define behavior for zhcm_c_lr alias LR
+use etag
+{
+  use create(augment);
+  use update;
+  use delete;
+
+  use action Activate;
+  use action Discard;
+  use action Edit;
+  use action Prepare;
+  use action resume;
+use association _Attachment { create; with draft;}
+use association _Approval { create; with draft;}
+}
+
+define behavior for zhcm_c_lr_att alias Attachment
+use etag
+{
+  use update;
+  use delete;
+  use association _LR {with draft;}
+}
+
+define behavior for zhcm_c_lr_approvals alias Approval
+use etag
+{
+ // use update;
+  //use delete;
+  use association _LR {with draft;}
+}

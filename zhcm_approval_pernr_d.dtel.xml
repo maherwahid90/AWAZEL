@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>ZHCM_APPROVAL_PERNR_D</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DOMNAME>PERNR</DOMNAME>
+    <MEMORYID>PER</MEMORYID>
+    <LOGFLAG>X</LOGFLAG>
+    <HEADLEN>20</HEADLEN>
+    <SCRLEN1>10</SCRLEN1>
+    <SCRLEN2>15</SCRLEN2>
+    <SCRLEN3>20</SCRLEN3>
+    <DDTEXT>Approval</DDTEXT>
+    <REPTEXT>Approval</REPTEXT>
+    <SCRTEXT_S>Approval</SCRTEXT_S>
+    <SCRTEXT_M>Approval</SCRTEXT_M>
+    <SCRTEXT_L>Approval</SCRTEXT_L>
+    <APPLCLASS>PB</APPLCLASS>
+    <DTELMASTER>D</DTELMASTER>
+    <DEFFDNAME>PERSON_NO</DEFFDNAME>
+    <REFKIND>D</REFKIND>
+   </DD04V>
+   <I18N_LANGS>
+    <LANGU>A</LANGU>
+    <LANGU>D</LANGU>
+   </I18N_LANGS>
+   <DD04_TEXTS>
+    <item>
+     <DDLANGUAGE>A</DDLANGUAGE>
+     <DDTEXT>رقم الموظف</DDTEXT>
+     <REPTEXT>رقم موظف</REPTEXT>
+     <SCRTEXT_S>رقم موظف</SCRTEXT_S>
+     <SCRTEXT_M>رقم الموظف</SCRTEXT_M>
+     <SCRTEXT_L>رقم الموظف</SCRTEXT_L>
+    </item>
+    <item>
+     <DDLANGUAGE>D</DDLANGUAGE>
+     <DDTEXT>Approval</DDTEXT>
+     <REPTEXT>Approval</REPTEXT>
+     <SCRTEXT_S>Approval</SCRTEXT_S>
+     <SCRTEXT_M>Approval</SCRTEXT_M>
+     <SCRTEXT_L>Approval</SCRTEXT_L>
+    </item>
+   </DD04_TEXTS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

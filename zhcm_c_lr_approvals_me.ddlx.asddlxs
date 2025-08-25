@@ -1,0 +1,50 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Approval',
+                     typeNamePlural: 'Approvals',
+                     title: { type: #STANDARD, value: 'ApprovalName' } } }
+annotate entity zhcm_c_lr_approvals
+    with 
+{
+@UI.facet: [ { id:            'Approval',
+                 purpose:       #STANDARD,
+                 type:          #IDENTIFICATION_REFERENCE,
+                 label:         'Approvals',
+                 position:      10 } ]
+    @UI.hidden: true  
+    RequestUuid;
+   @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],
+                             identification: [ { position: 10 } ] 
+         }
+         @EndUserText.label: 'Sequence'
+    ApprovalSeq;
+       @UI: { lineItem:       [ { position: 20, importance: #HIGH } ],
+                             identification: [ { position: 20 } ] 
+         }
+         @EndUserText.label: 'Approval'
+    ApprovalPernr;
+    @UI.hidden: true
+    ApprovalName;
+       @UI: { lineItem:       [ { position: 30, importance: #HIGH } ],
+                             identification: [ { position: 30 } ] 
+         }
+         @EndUserText.label: 'Received At'
+    ReceiveTs;
+       @UI: { lineItem:       [ { position: 40, importance: #HIGH } ],
+                             identification: [ { position: 40 } ] 
+         }
+         @EndUserText.label: 'Completed At'
+    CompleteTs;
+       @UI: { lineItem:       [ { position: 50, importance: #HIGH ,criticality: 'StatusCrit' } ],
+                             identification: [ { position: 50 ,criticality: 'StatusCrit' } ] 
+         }
+         @EndUserText.label: 'Status'
+    Status;
+       @UI: { lineItem:       [ { position: 60, importance: #HIGH} ],
+                             identification: [ { position: 60 } ] 
+         }
+         @EndUserText.label: 'Comment'
+         @UI.multiLineText: true
+    ApprovalComment;
+
+    
+}
