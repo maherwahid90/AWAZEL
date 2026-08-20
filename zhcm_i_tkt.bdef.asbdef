@@ -1,0 +1,117 @@
+managed implementation in class zbp_hcm_i_tkt unique;
+strict ( 2 );
+with draft;
+define behavior for zhcm_i_tkt alias TKT
+persistent table Zhcm_ticket_req
+with additional save
+draft table zhcm_dr_tkt
+lock master
+total etag LastChangedAt
+authorization master ( instance )
+etag master LocalLastChangedAt
+{
+  create;
+  update(features : instance);
+  delete(features : instance);
+  association _Family { create;with draft; }
+  association _Approval { create;with draft; }
+  determination setRequestNumber on save { create; }
+  determination populateFamily on modify { create; field TicketType; }
+  side effects
+  {
+    field TicketType affects entity _Family;
+  }
+  validation validateTicket on save { create; field TicketType,Begda, Endda; }
+  field ( mandatory) Pernr,TicketType,Begda,Endda;
+  field ( numbering : managed, readonly ) RequestUuid;
+  field ( readonly ) LocalLastChangedAt,LocalCreatedAt;
+   field ( features : instance ) Pernr,hiredate,PlansTxt,OrgehTxt,RequestId;
+  draft determine action Prepare{}
+ draft action resume;
+ draft action Edit;
+ draft action Activate optimized;
+ draft action Discard;
+
+  mapping for zhcm_ticket_req{
+ RequestUuid = request_uuid;
+    RequestId = request_id;
+    Pernr = pernr ;
+    hiredate = hire_date;
+    TicketType = ticket_type;
+    Begda = begda;
+    Endda = endda;
+    Direction = direction;
+    Destination = destination;
+    Route = route;
+    Remarks=remarks ;
+    ReqStatus= req_status;
+    LocalCreatedBy=local_created_by;
+
+    LocalCreatedAt=local_created_at ;
+    LocalLastChangedBy = local_last_changed_by;
+    LocalLastChangedAt = local_last_changed_at;
+    LastChangedAt=last_changed_at ;
+  }
+
+}
+
+define behavior for zhcm_i_tkt_family alias _Family
+persistent table Zhcm_tkt_family
+draft table zhcm_dr_tkt_fam
+lock dependent by _Ticket
+authorization dependent by _Ticket
+etag master LocalLastChangedAt
+{
+  create;
+  update;
+  delete;
+  determination calculateAge on modify { field Birthdate; }
+  field ( mandatory ) FirstName,LastName,Birthdate,PassportNo;
+  field ( readonly ) RequestUuid,Age,SourceSubty,LocalLastChangedAt,LocalCreatedAt;
+  association _Ticket {with draft;}
+  field (numbering : managed,readonly) FamilyUuid;
+  mapping for zhcm_tkt_family{
+
+FamilyUuid = family_uuid ;
+   RequestUuid =  request_uuid ;
+    FirstName = first_name ;
+    LastName = last_name;
+    Birthdate = birthdate;
+    Age = age;
+    PassportNo = passport_no;
+    SourceSubty = source_subty;
+        LocalCreatedBy=local_created_by;
+
+    LocalCreatedAt=local_created_at ;
+    LocalLastChangedBy = local_last_changed_by;
+    LocalLastChangedAt = local_last_changed_at;
+    LastChangedAt=last_changed_at ;
+
+  }
+}
+
+
+define behavior for zhcm_i_tkt_approvals alias _Approval
+persistent table zhcm_tkt_approv
+draft table zhcm_dr_tkt_aps
+lock dependent by _Ticket
+authorization dependent by _Ticket
+etag master ReceiveTs
+{
+  update(features : instance);
+  delete(features : instance);
+  field ( readonly ) RequestUuid,ApprovalSeq;
+  association _Ticket {with draft;}
+  mapping for zhcm_tkt_approv{
+
+   RequestUuid =  request_uuid ;
+    ApprovalSeq = approval_seq ;
+    ApprovalPernr = approval_pernr;
+    ApprovalName = approval_name;
+    ReceiveTs = receive_ts;
+    CompleteTs = complete_ts;
+    Status = status;
+   ApprovalComment = approval_comment;
+
+  }
+}

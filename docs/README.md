@@ -26,6 +26,7 @@ application/module, plus this index describing the shared architecture and conve
 | 7 | [apps/07-time-sheet-upload.md](apps/07-time-sheet-upload.md) | **Time Sheet Upload** (`ZHCM_UPLOAD_TS`) | SAP GUI report (Excel upload) |
 | 8 | [apps/08-shared-master-data-and-enhancements.md](apps/08-shared-master-data-and-enhancements.md) | **Shared CDS views, domains & HR enhancements/BAdIs** | Cross-application building blocks |
 | 9 | [apps/09-exit-reentry-request-planned.md](apps/09-exit-reentry-request-planned.md) | **Exit / Re-entry Visa Request** | ⚠️ Data model only — not yet built |
+| 10 | [apps/10-tickets-request.md](apps/10-tickets-request.md) | **Tickets Request** (`ZHCM_TICKET_REQ`) | RAP transactional Fiori app (employee) + HR approval workflow |
 
 ## High-level architecture
 
@@ -130,6 +131,7 @@ Domain **`ZHCM_APP_ID`** identifies *which* request type a generic FM/table row 
 |-------|-------------|
 | `01` | Leave Request |
 | `02` | Overtime Request |
+| `03` | Tickets Request |
 
 **When adding a new request-type app, register a new value here first** — the whole approval
 engine (`ZHCM_UPDATE_APPROVALS`, `ZHCM_GET_APPROVALS_IN_USER_DEC`) branches on `APP_ID`.

@@ -1,0 +1,8 @@
+@EndUserText.label: 'Service Definition for Tickets Request'
+define service Zhcm_c_tkt_sd {
+  expose zhcm_c_tkt;
+  expose zhcm_c_tkt_family;
+  expose zhcm_c_tkt_approvals;
+  expose zhcm_tkt_type_view;
+  expose zhcm_employee_help;
+}

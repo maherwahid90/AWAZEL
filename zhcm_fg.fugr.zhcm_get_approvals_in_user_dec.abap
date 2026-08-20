@@ -34,6 +34,8 @@ FUNCTION ZHCM_GET_APPROVALS_IN_USER_DEC.
       SELECT SINGLE PERNR FROM zhcm_leave_req INTO @DATA(PERNR) WHERE request_uuid = @current_approval-request_uuid.
     WHEN '02'.
 SELECT SINGLE PERNR FROM zhcm_overt_req INTO @PERNR WHERE request_uuid = @current_approval-request_uuid.
+    WHEN '03'.
+SELECT SINGLE PERNR FROM zhcm_ticket_req INTO @PERNR WHERE request_uuid = @current_approval-request_uuid.
   ENDCASE.
 
    SELECT SINGLE * FROM zhcm_ess_approv INTO @DATA(ESS_APPROVAL) WHERE APP_ID = @APP_ID AND approver_seq = @current_approval-approval_seq.
