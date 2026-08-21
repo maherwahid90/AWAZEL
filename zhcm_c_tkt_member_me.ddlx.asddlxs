@@ -1,29 +1,29 @@
 @Metadata.layer: #CORE
 @UI: { headerInfo: { typeName: 'Family Member',
                      typeNamePlural: 'Family Members',
-                     title: { type: #STANDARD, value: 'FirstName' } } }
-annotate entity zhcm_c_tkt_family
+                     title: { type: #STANDARD, value: 'Name' } } }
+annotate entity zhcm_c_tkt_member
     with
 {
-@UI.facet: [ { id:            'Family',
+@UI.facet: [ { id:            'Member',
                  purpose:       #STANDARD,
                  type:          #IDENTIFICATION_REFERENCE,
                  label:         'Family Member',
                  position:      10 } ]
     @UI.hidden: true
-    FamilyUuid;
-    @UI.hidden: true
     RequestUuid;
+    @UI.hidden: true
+    FamilySeq;
    @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],
                              identification: [ { position: 10 } ]
          }
-         @EndUserText.label: 'First Name'
-    FirstName;
+         @EndUserText.label: 'Selected'
+    Selected;
        @UI: { lineItem:       [ { position: 20, importance: #HIGH } ],
                              identification: [ { position: 20 } ]
          }
-         @EndUserText.label: 'Last Name'
-    LastName;
+         @EndUserText.label: 'Name'
+    Name;
        @UI: { lineItem:       [ { position: 30, importance: #HIGH } ],
                              identification: [ { position: 30 } ]
          }
@@ -39,16 +39,4 @@ annotate entity zhcm_c_tkt_family
          }
          @EndUserText.label: 'Passport Number'
     PassportNo;
-    @UI.hidden: true
-    SourceSubty;
-    @UI.hidden: true
-    LocalCreatedBy;
-    @UI.hidden: true
-    LocalCreatedAt;
-    @UI.hidden: true
-    LocalLastChangedBy;
-    @UI.hidden: true
-    LocalLastChangedAt;
-    @UI.hidden: true
-    LastChangedAt;
 }

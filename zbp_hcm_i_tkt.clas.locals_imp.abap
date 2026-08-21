@@ -10,8 +10,8 @@ CLASS lhc_TKT DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS setRequestNumber FOR DETERMINE ON SAVE
       IMPORTING keys FOR tkt~setRequestNumber.
 
-    METHODS populateFamily FOR DETERMINE ON MODIFY
-      IMPORTING keys FOR tkt~populateFamily.
+    METHODS populateMembers FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR tkt~populateMembers.
 
     METHODS validateTicket FOR VALIDATE ON SAVE
       IMPORTING keys FOR tkt~validateTicket.
@@ -61,36 +61,32 @@ CLASS lhc_TKT IMPLEMENTATION.
                            RequestId = max_requestid + i ) ).
   ENDMETHOD.
 
-  METHOD populateFamily.
-    " Auto-populate family/companion data from infotype 0021 (Family Member/Dependants)
-    " the first time the employee chooses a ticket type that involves family members.
-    " The employee can still manually add/remove/edit rows afterwards (_Family allows
-    " create/update/delete), matching the FS: "family members are auto-populated from
-    " the employee's file, but the employee can also manually add and select a family
-    " member if needed".
+  METHOD populateMembers.
+    " Auto-list every infotype 0021 (Family Member/Dependants) record valid today for the
+    " requester the first time the employee chooses a ticket type that involves family
+    " members, with Selected initially unset - the employee then ticks "Selected" for
+    " whichever dependants actually need a ticket, and can still add further rows by hand
+    " (create is enabled on _Member) for anyone not found in PA0021.
     READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
       ENTITY tkt
         FIELDS ( Pernr TicketType )
         WITH CORRESPONDING #( keys )
       RESULT DATA(tkts).
 
-    DATA family_create TYPE TABLE FOR CREATE zhcm_i_tkt\_Family.
-    DATA lv_cid_no TYPE i VALUE 0.
+    DATA member_create TYPE TABLE FOR CREATE zhcm_i_tkt\_Member.
 
     LOOP AT tkts INTO DATA(tkt_wa) WHERE TicketType = '2' OR TicketType = '3'.
 
       READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
-        ENTITY tkt BY \_Family
+        ENTITY tkt BY \_Member
         ALL FIELDS WITH VALUE #( ( %tky = tkt_wa-%tky ) )
-        RESULT DATA(existing_family).
-      CHECK existing_family IS INITIAL.
+        RESULT DATA(existing_members).
+      CHECK existing_members IS INITIAL.
 
-      " NOTE: PA0021 (Family Member/Dependants) field names below follow the
-      " functional spec (PA0021-FANAM for first name, PA0021-ARLNM for family/
-      " last name). ARLNM is not a universally standard PA0021 field in every
-      " system configuration - verify the actual subtype structure/field names
-      " against the target system before activating and adjust the SELECT below
-      " (e.g. NACHN or a customer-specific field) if it differs.
+      " NOTE: PA0021 (Family Member/Dependants) field names - verify the actual subtype
+      " structure/field names on the target system before activating (FANAM = first name is
+      " a standard field; the "last/family name" field varies by configuration - adjust the
+      " SELECT below, e.g. NACHN, if it differs).
       SELECT pernr, subty, fanam, nachn, fgbdt, pspnm
         FROM pa0021
         WHERE pernr = @tkt_wa-Pernr
@@ -99,27 +95,29 @@ CLASS lhc_TKT IMPLEMENTATION.
 
       CHECK family_it IS NOT INITIAL.
 
-      APPEND VALUE #( %tky    = tkt_wa-%tky
-                       %target = VALUE #( FOR fam IN family_it (
-                                              %cid                  = |TKTFAM{ lv_cid_no = lv_cid_no + 1 }|
-                                              FirstName             = fam-fanam
-                                              LastName              = fam-nachn
-                                              Birthdate             = fam-fgbdt
-                                              PassportNo            = fam-pspnm
-                                              SourceSubty           = fam-subty
-                                              %control-FirstName    = if_abap_behv=>mk-on
-                                              %control-LastName     = if_abap_behv=>mk-on
-                                              %control-Birthdate    = if_abap_behv=>mk-on
-                                              %control-PassportNo   = if_abap_behv=>mk-on
-                                              %control-SourceSubty  = if_abap_behv=>mk-on ) ) )
-             TO family_create.
+      DATA(next_seq) = 0.
+      LOOP AT family_it INTO DATA(fam).
+        next_seq += 1.
+        APPEND VALUE #( %tky                = tkt_wa-%tky
+                         %target            = VALUE #( ( %cid          = |TKTMEM{ sy-uuid_c32 }|
+                                                          %key-FamilySeq = next_seq
+                                                          Selected      = abap_false
+                                                          Name          = |{ fam-fanam } { fam-nachn }|
+                                                          Birthdate     = fam-fgbdt
+                                                          PassportNo    = fam-pspnm
+                                                          %control-Selected   = if_abap_behv=>mk-on
+                                                          %control-Name       = if_abap_behv=>mk-on
+                                                          %control-Birthdate  = if_abap_behv=>mk-on
+                                                          %control-PassportNo = if_abap_behv=>mk-on ) ) )
+               TO member_create.
+      ENDLOOP.
     ENDLOOP.
 
-    CHECK family_create IS NOT INITIAL.
+    CHECK member_create IS NOT INITIAL.
     MODIFY ENTITIES OF zhcm_i_tkt IN LOCAL MODE
       ENTITY tkt
-        CREATE BY \_Family
-        FROM family_create.
+        CREATE BY \_Member
+        FROM member_create.
   ENDMETHOD.
 
   METHOD validateTicket.
@@ -128,13 +126,14 @@ CLASS lhc_TKT IMPLEMENTATION.
         FIELDS ( Pernr TicketType Begda Endda )
         WITH CORRESPONDING #( keys )
       RESULT DATA(tkts)
-      ENTITY tkt BY \_Family ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(tkts_family).
+      ENTITY tkt BY \_Member ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(tkts_member).
 
     LOOP AT tkts INTO DATA(tkt_wa).
 
-      " Family data required for ticket types that include family members.
+      " At least one selected member is required for ticket types that include family.
       IF tkt_wa-TicketType = '2' OR tkt_wa-TicketType = '3'.
-        READ TABLE tkts_family TRANSPORTING NO FIELDS WITH KEY %tky = tkt_wa-%tky.
+        READ TABLE tkts_member TRANSPORTING NO FIELDS
+          WITH KEY %tky = tkt_wa-%tky selected = abap_true.
         IF sy-subrc <> 0.
           APPEND VALUE #( %tky = tkt_wa-%tky ) TO failed-tkt.
           APPEND VALUE #( %tky        = tkt_wa-%tky
@@ -184,18 +183,15 @@ CLASS lhc_TKT IMPLEMENTATION.
 
 ENDCLASS.
 
-CLASS lhc__Family DEFINITION INHERITING FROM cl_abap_behavior_handler.
+CLASS lhc__Attachment DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
 
     METHODS get_instance_features FOR INSTANCE FEATURES
-      IMPORTING keys REQUEST requested_features FOR _Family RESULT result.
-
-    METHODS calculateAge FOR DETERMINE ON MODIFY
-      IMPORTING keys FOR _Family~calculateAge.
+      IMPORTING keys REQUEST requested_features FOR _Attachment RESULT result.
 
 ENDCLASS.
 
-CLASS lhc__Family IMPLEMENTATION.
+CLASS lhc__Attachment IMPLEMENTATION.
 
   METHOD get_instance_features.
     LOOP AT keys INTO DATA(key).
@@ -208,21 +204,86 @@ CLASS lhc__Family IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+ENDCLASS.
+
+CLASS lhc__Member DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+
+    METHODS get_instance_features FOR INSTANCE FEATURES
+      IMPORTING keys REQUEST requested_features FOR _Member RESULT result.
+
+    METHODS earlynumbering_create FOR NUMBERING
+      IMPORTING entities FOR CREATE zhcm_i_tkt\_Member.
+
+    METHODS calculateAge FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR _Member~calculateAge.
+
+ENDCLASS.
+
+CLASS lhc__Member IMPLEMENTATION.
+
+  METHOD get_instance_features.
+    LOOP AT keys INTO DATA(key).
+      result[ %key = CORRESPONDING #( key ) ]-%update = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
+                                 THEN if_abap_behv=>fc-o-enabled
+                                 ELSE if_abap_behv=>fc-o-disabled ).
+      result[ %key = CORRESPONDING #( key ) ]-%delete = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
+                                 THEN if_abap_behv=>fc-o-enabled
+                                 ELSE if_abap_behv=>fc-o-disabled ).
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD earlynumbering_create.
+    " ZHCM_TICK_MEMBER's key includes FAMILY_SEQ (a running line number per request), unlike
+    " every UUID-keyed child elsewhere in this suite - so it cannot use the framework's
+    " built-in "numbering: managed" UUID generation and needs this early-numbering handler
+    " instead, for rows the *employee* creates by hand via the Fiori Elements "Add" button
+    " (rows created by the populateMembers determination already assign FamilySeq themselves
+    " and never reach this method). This method's exact API shape (the %cid/%key/%is_draft
+    " fields of the `mapped-_member` result) should be re-checked against ADT's type
+    " proposal/syntax check when activated - it is the one part of this app's RAP code that
+    " could not be verified against a real compiler in this session.
+    LOOP AT entities INTO DATA(entity).
+
+      SELECT SINGLE FROM zhcm_tick_member
+        FIELDS MAX( family_seq )
+        WHERE request_uuid = @entity-RequestUuid
+        INTO @DATA(max_seq).
+
+      READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
+        ENTITY tkt BY \_Member
+        ALL FIELDS WITH VALUE #( ( RequestUuid = entity-RequestUuid ) )
+        RESULT DATA(existing_members).
+
+      LOOP AT existing_members INTO DATA(exist_wa) WHERE FamilySeq > max_seq.
+        max_seq = exist_wa-FamilySeq.
+      ENDLOOP.
+
+      max_seq += 1.
+
+      mapped-_member = VALUE #( BASE mapped-_member (
+                                    %cid           = entity-%cid
+                                    %key           = entity-%key
+                                    %is_draft      = entity-%is_draft
+                                    FamilySeq      = max_seq ) ).
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD calculateAge.
     READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
-      ENTITY _Family
+      ENTITY _Member
         FIELDS ( Birthdate )
         WITH CORRESPONDING #( keys )
-      RESULT DATA(family_it).
+      RESULT DATA(member_it).
 
-    LOOP AT family_it ASSIGNING FIELD-SYMBOL(<fam_wa>) WHERE Birthdate IS NOT INITIAL.
+    LOOP AT member_it ASSIGNING FIELD-SYMBOL(<mem_wa>) WHERE Birthdate IS NOT INITIAL.
       DATA: years  TYPE pea_scryy,
             months TYPE pea_scrmm,
             days   TYPE pea_scrdd.
       CALL FUNCTION 'HR_HK_DIFF_BT_2_DATES'
         EXPORTING
           date1          = sy-datum
-          date2          = <fam_wa>-Birthdate
+          date2          = <mem_wa>-Birthdate
           output_format  = '05'
         IMPORTING
           years          = years
@@ -231,14 +292,18 @@ CLASS lhc__Family IMPLEMENTATION.
         EXCEPTIONS
           OTHERS         = 1.
       IF sy-subrc = 0.
-        <fam_wa>-Age = years.
+        " NOTE: ZHCM_TICK_MEMBER-AGE is typed DEC(3,2) - only 1 digit before the decimal
+        " point (max 9.99), so this assignment overflows/dumps for any age >= 10. Flagging
+        " this clearly rather than silently working around it: recommend changing AGE to a
+        " plain integer/DEC(3,0) type before this determination is activated for real use.
+        <mem_wa>-Age = years.
       ENDIF.
     ENDLOOP.
 
     MODIFY ENTITIES OF zhcm_i_tkt IN LOCAL MODE
-      ENTITY _Family
+      ENTITY _Member
         UPDATE FIELDS ( Age )
-        WITH CORRESPONDING #( family_it ).
+        WITH CORRESPONDING #( member_it ).
   ENDMETHOD.
 
 ENDCLASS.

@@ -4,8 +4,8 @@
   <asx:values>
    <DDLX>
     <METADATA>
-     <NAME>ZHCM_C_TKT_FAMILY_ME</NAME>
-     <DESCRIPTION>Metadata Extension for Tickets Request Family Members</DESCRIPTION>
+     <NAME>ZHCM_C_TKT_ATTACH_ME</NAME>
+     <DESCRIPTION>Metadata Extension for Tickets Request Attachments</DESCRIPTION>
      <MASTER_LANGUAGE>EN</MASTER_LANGUAGE>
     </METADATA>
    </DDLX>

@@ -1,0 +1,17 @@
+@EndUserText.label : 'Ticket Members'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zhcm_tick_member {
+
+  key client       : abap.clnt not null;
+  key request_uuid : sysuuid_x16 not null;
+  key family_seq   : abap.int1 not null;
+  selected         : boolean;
+  name             : char200;
+  gbdat            : gbdat;
+  age              : abap.dec(3,2);
+  passport_no      : p24_pspnm;
+
+}

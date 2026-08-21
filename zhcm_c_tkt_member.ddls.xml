@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLS>
-    <DDLNAME>ZHCM_C_TKT_FAMILY</DDLNAME>
+    <DDLNAME>ZHCM_C_TKT_MEMBER</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>Consumption view for Tickets Request Family Members</DDTEXT>
+    <DDTEXT>Consumption view for Tickets Request Members</DDTEXT>
     <SOURCE_TYPE>P</SOURCE_TYPE>
    </DDLS>
   </asx:values>

@@ -13,13 +13,14 @@ etag master LocalLastChangedAt
   create;
   update(features : instance);
   delete(features : instance);
-  association _Family { create;with draft; }
+  association _Attachment { create;with draft; }
+  association _Member { create;with draft; }
   association _Approval { create;with draft; }
   determination setRequestNumber on save { create; }
-  determination populateFamily on modify { create; field TicketType; }
+  determination populateMembers on modify { create; field TicketType; }
   side effects
   {
-    field TicketType affects entity _Family;
+    field TicketType affects entity _Member;
   }
   validation validateTicket on save { create; field TicketType,Begda, Endda; }
   field ( mandatory) Pernr,TicketType,Begda,Endda;
@@ -36,13 +37,12 @@ etag master LocalLastChangedAt
  RequestUuid = request_uuid;
     RequestId = request_id;
     Pernr = pernr ;
-    hiredate = hire_date;
     TicketType = ticket_type;
     Begda = begda;
     Endda = endda;
-    Direction = direction;
-    Destination = destination;
-    Route = route;
+    TicketDirection = ticket_direction;
+    TravelDestination = travel_destination;
+    JourneyRoute = journey_route;
     Remarks=remarks ;
     ReqStatus= req_status;
     LocalCreatedBy=local_created_by;
@@ -55,31 +55,28 @@ etag master LocalLastChangedAt
 
 }
 
-define behavior for zhcm_i_tkt_family alias _Family
-persistent table Zhcm_tkt_family
-draft table zhcm_dr_tkt_fam
+define behavior for zhcm_i_tkt_attach alias _Attachment
+persistent table Zhcm_tick_attach
+draft table zhcm_dr_tkt_at
 lock dependent by _Ticket
 authorization dependent by _Ticket
 etag master LocalLastChangedAt
 {
-  create;
   update;
   delete;
-  determination calculateAge on modify { field Birthdate; }
-  field ( mandatory ) FirstName,LastName,Birthdate,PassportNo;
-  field ( readonly ) RequestUuid,Age,SourceSubty,LocalLastChangedAt,LocalCreatedAt;
+  field ( mandatory ) Attachment;
+  field ( readonly ) RequestUuid;
+  field ( readonly ) LocalLastChangedAt,LocalCreatedAt;
   association _Ticket {with draft;}
-  field (numbering : managed,readonly) FamilyUuid;
-  mapping for zhcm_tkt_family{
+  field (numbering : managed,readonly) AttachmentUuid;
+  mapping for zhcm_tick_attach{
 
-FamilyUuid = family_uuid ;
+AttachmentUuid = attachment_uuid ;
    RequestUuid =  request_uuid ;
-    FirstName = first_name ;
-    LastName = last_name;
-    Birthdate = birthdate;
-    Age = age;
-    PassportNo = passport_no;
-    SourceSubty = source_subty;
+    Attachment = attachment ;
+    Mimetype = mimetype;
+    Filename = filename;
+    Comments = comments;
         LocalCreatedBy=local_created_by;
 
     LocalCreatedAt=local_created_at ;
@@ -90,9 +87,37 @@ FamilyUuid = family_uuid ;
   }
 }
 
+define behavior for zhcm_i_tkt_member alias _Member
+  early numbering
+persistent table Zhcm_tick_member
+draft table zhcm_dr_tkt_mem
+lock dependent by _Ticket
+authorization dependent by _Ticket
+{
+  create;
+  update;
+  delete;
+  determination assignMemberSeq on save { create; }
+  determination calculateAge on modify { create; field Birthdate; }
+  field ( mandatory ) Name;
+  field ( readonly ) RequestUuid,FamilySeq,Age;
+  association _Ticket {with draft;}
+  mapping for zhcm_tick_member{
+
+   RequestUuid =  request_uuid ;
+    FamilySeq = family_seq ;
+    Selected = selected;
+    Name = name;
+    Birthdate = gbdat;
+    Age = age;
+    PassportNo = passport_no;
+
+  }
+}
+
 
 define behavior for zhcm_i_tkt_approvals alias _Approval
-persistent table zhcm_tkt_approv
+persistent table zhcm_tick_approv
 draft table zhcm_dr_tkt_aps
 lock dependent by _Ticket
 authorization dependent by _Ticket
@@ -102,7 +127,7 @@ etag master ReceiveTs
   delete(features : instance);
   field ( readonly ) RequestUuid,ApprovalSeq;
   association _Ticket {with draft;}
-  mapping for zhcm_tkt_approv{
+  mapping for zhcm_tick_approv{
 
    RequestUuid =  request_uuid ;
     ApprovalSeq = approval_seq ;

@@ -160,12 +160,19 @@
               "name": "sap.suite.ui.generic.template.ObjectPage"
             },
             "pages": {
-              "ObjectPage|zhcm_c_tkt_family": {
+              "ObjectPage|zhcm_c_tkt_attach": {
                 "component": {
                   "name": "sap.suite.ui.generic.template.ObjectPage"
                 },
-                "entitySet": "zhcm_c_tkt_family",
-                "navigationProperty": "to_Family"
+                "entitySet": "zhcm_c_tkt_attach",
+                "navigationProperty": "to_Attachment"
+              },
+              "ObjectPage|zhcm_c_tkt_member": {
+                "component": {
+                  "name": "sap.suite.ui.generic.template.ObjectPage"
+                },
+                "entitySet": "zhcm_c_tkt_member",
+                "navigationProperty": "to_Member"
               }
             }
           }

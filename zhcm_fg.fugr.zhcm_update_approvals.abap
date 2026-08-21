@@ -53,7 +53,7 @@ MODIFY zhcm_lr_approv FROM TABLE approvals_it.
 when '02'.
 MODIFY zhcm_ov_approv FROM TABLE approvals_it.
 when '03'.
-MODIFY zhcm_tkt_approv FROM TABLE approvals_it.
+MODIFY zhcm_tick_approv FROM TABLE approvals_it.
 endcase.
 COMMIT WORK AND WAIT.
 ELSEIF status = 'D'.
@@ -64,7 +64,7 @@ case app_id.
   when '02'.
     delete from zhcm_ov_approv WHERE request_uuid = @requestuuid.
   when '03'.
-    delete from zhcm_tkt_approv WHERE request_uuid = @requestuuid.
+    delete from zhcm_tick_approv WHERE request_uuid = @requestuuid.
 endcase.
   COMMIT WORK AND WAIT.
   endif.

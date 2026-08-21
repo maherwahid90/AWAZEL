@@ -1,0 +1,20 @@
+@EndUserText.label : 'Draft table for entity ZHCM_I_TKT_APPROVALS'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zhcm_dr_tkt_aps {
+
+  key client       : mandt not null;
+  key request_uuid : sysuuid_x16 not null;
+  key approval_seq : abap.int1 not null;
+  approval_pernr   : pernr_d;
+  approval_name    : emnam;
+  receive_ts       : abp_creation_tstmpl;
+  complete_ts      : abp_creation_tstmpl;
+  status           : abap.char(40);
+  approval_comment : abap.char(200);
+
+  include sych_bdl_draft_admin_inc as admin;
+
+}

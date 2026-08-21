@@ -3,7 +3,7 @@
 @EndUserText.label: 'Interface view for Tickets Request Approvals'
 //@Metadata.ignorePropagatedAnnotations: true
 
-define view entity zhcm_i_tkt_approvals as select from zhcm_tkt_approv
+define view entity zhcm_i_tkt_approvals as select from zhcm_tick_approv
 association to parent zhcm_i_tkt as _Ticket
     on $projection.RequestUuid = _Ticket.RequestUuid
 {

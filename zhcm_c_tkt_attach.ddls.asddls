@@ -1,17 +1,15 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Consumption view for Tickets Request Family Members'
+@EndUserText.label: 'Interface view for Tickets Attachments'
 @Metadata.ignorePropagatedAnnotations: true
 @Metadata.allowExtensions: true
-define view entity zhcm_c_tkt_family as projection on zhcm_i_tkt_family
+define view entity zhcm_c_tkt_attach as projection on zhcm_i_tkt_attach
 {
-    key FamilyUuid,
+    key AttachmentUuid,
     RequestUuid,
-    FirstName,
-    LastName,
-    Birthdate,
-    Age,
-    PassportNo,
-    SourceSubty,
+    Attachment,
+    Mimetype,
+    Filename,
+    Comments,
     LocalCreatedBy,
     LocalCreatedAt,
     LocalLastChangedBy,

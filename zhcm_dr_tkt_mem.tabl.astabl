@@ -1,0 +1,19 @@
+@EndUserText.label : 'Draft table for entity ZHCM_I_TKT_MEMBER'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zhcm_dr_tkt_mem {
+
+  key client       : mandt not null;
+  key request_uuid : sysuuid_x16 not null;
+  key family_seq   : abap.int1 not null;
+  selected         : boolean;
+  name             : char200;
+  gbdat            : gbdat;
+  age              : abap.dec(3,2);
+  passport_no      : p24_pspnm;
+
+  include sych_bdl_draft_admin_inc as admin;
+
+}

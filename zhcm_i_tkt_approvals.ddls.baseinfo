@@ -3,7 +3,7 @@
 {
 "FROM":
 [
-"ZHCM_TKT_APPROV"
+"ZHCM_TICK_APPROV"
 ],
 "ASSOCIATED":
 [

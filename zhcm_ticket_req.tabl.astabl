@@ -1,0 +1,28 @@
+@EndUserText.label : 'HCM Ticket Request'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zhcm_ticket_req {
+
+  key client            : mandt not null;
+  key request_uuid      : sysuuid_x16 not null;
+  request_id            : zhcm_req_no;
+  pernr                 : pernr_d;
+  ticket_type           : zticket_type;
+  begda                 : begda;
+  endda                 : endda;
+  ticket_direction      : zticket_direction;
+  travel_destination    : ztravel_destination;
+  journey_route         : zjourney_route;
+  remarks               : zhcm_req_remarks;
+  req_status            : zhcm_req_status;
+  local_created_by      : abp_creation_user;
+  local_created_at      : abp_creation_tstmpl;
+  local_last_changed_by : abp_locinst_lastchange_user;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+  return_code           : syst_subrc;
+  workitem_id           : sww_wiid;
+
+}

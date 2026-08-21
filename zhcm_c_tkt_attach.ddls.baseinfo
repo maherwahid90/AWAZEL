@@ -3,11 +3,11 @@
 {
 "FROM":
 [
-"ZHCM_TKT_FAMILY"
+"ZHCM_I_TKT_ATTACH"
 ],
 "ASSOCIATED":
 [
-"ZHCM_I_TKT"
+"ZHCM_C_TKT"
 ],
 "BASE":
 [],

@@ -3,7 +3,7 @@
 {
 "FROM":
 [
-"ZHCM_I_TKT_FAMILY"
+"ZHCM_I_TKT_MEMBER"
 ],
 "ASSOCIATED":
 [

@@ -1,0 +1,20 @@
+@EndUserText.label : 'Ticket Approvals'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zhcm_tick_approv {
+
+  key client       : abap.clnt not null;
+  key request_uuid : sysuuid_x16 not null;
+  key approval_seq : abap.int1 not null;
+  approval_pernr   : pernr_d;
+  approval_name    : emnam;
+  receive_ts       : abp_creation_tstmpl;
+  complete_ts      : abp_creation_tstmpl;
+  status           : abap.char(40);
+  approval_comment : abap.char(200);
+  approval_user    : sysid;
+  wf_user          : char40;
+
+}

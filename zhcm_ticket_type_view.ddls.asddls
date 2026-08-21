@@ -8,11 +8,11 @@
     sizeCategory: #S,
     dataClass: #MIXED
 }
-define view entity zhcm_tkt_type_view as select from dd07t
+define view entity zhcm_ticket_type_view as select from dd07t
 {
 @ObjectModel.text.element:  [ 'Ddtext' ]
     key domvalue_l as DomvalueL,
 @Semantics.text: true
     ddtext as Ddtext
 
-} where ddlanguage = $session.system_language and domname = 'ZHCM_TKT_TYPE'
+} where ddlanguage = $session.system_language and domname = 'ZTICKET_TYPE'

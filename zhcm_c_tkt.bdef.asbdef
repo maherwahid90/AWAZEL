@@ -14,11 +14,20 @@ use etag
   use action Edit;
   use action Prepare;
   use action resume;
-use association _Family { create; with draft;}
+use association _Attachment { create; with draft;}
+use association _Member { create; with draft;}
 use association _Approval { create; with draft;}
 }
 
-define behavior for zhcm_c_tkt_family alias Family
+define behavior for zhcm_c_tkt_attach alias Attachment
+use etag
+{
+  use update;
+  use delete;
+  use association _Ticket {with draft;}
+}
+
+define behavior for zhcm_c_tkt_member alias Member
 use etag
 {
   use create;

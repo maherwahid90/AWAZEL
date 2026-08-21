@@ -18,15 +18,15 @@ define root view entity zhcm_c_tkt provider contract transactional_query as proj
     hiredate,
 
     @ObjectModel.text.element:  [ 'TicketTypeText' ]
-    @Consumption.valueHelpDefinition: [{ entity: { name : 'zhcm_tkt_type_view', element : 'DomvalueL' } }]
+    @Consumption.valueHelpDefinition: [{ entity: { name : 'zhcm_ticket_type_view', element : 'DomvalueL' } }]
     TicketType,
     @Semantics.text: true
     TicketTypeText,
     Begda,
     Endda,
-    Direction,
-    Destination,
-    Route,
+    TicketDirection,
+    TravelDestination,
+    JourneyRoute,
     Remarks,
     @ObjectModel.text.element:  [ 'ReqStatusText' ]
     @Consumption.valueHelpDefinition: [{ entity: { name : 'zhcm_req_status_view', element : 'DomvalueL' } }]
@@ -40,6 +40,7 @@ define root view entity zhcm_c_tkt provider contract transactional_query as proj
     LocalLastChangedAt,
     LastChangedAt,
     /* Associations */
-    _Family:redirected to composition child zhcm_c_tkt_family,
+    _Attachment:redirected to composition child zhcm_c_tkt_attach,
+    _Member:redirected to composition child zhcm_c_tkt_member,
     _Approval:redirected to composition child zhcm_c_tkt_approvals
 } where LocalCreatedBy = $session.user
