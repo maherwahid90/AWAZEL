@@ -97,7 +97,6 @@ authorization dependent by _Ticket
   create;
   update;
   delete;
-  determination assignMemberSeq on save { create; }
   determination calculateAge on modify { create; field Birthdate; }
   field ( mandatory ) Name;
   field ( readonly ) RequestUuid,FamilySeq,Age;
