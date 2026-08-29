@@ -1,0 +1,124 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Employee Communication Data',
+                     typeNamePlural: 'Employee Communication Data Requests',
+                     title: { type: #STANDARD, value: 'CommunicationTypeText' } ,
+                     description: {
+                     value: 'RequestId'
+        },typeImageUrl: 'sap-icon://email'
+        },
+
+       presentationVariant: [{ sortOrder: [{ by: 'RequestId', direction: #DESC }] }] }
+
+annotate entity zhcm_c_ecd
+    with
+{
+
+@UI.facet: [
+   {
+          label: 'Employee Data',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 10,
+          targetQualifier: 'Employee'
+      },
+      {
+          label: 'Request Status',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 20,
+          targetQualifier: 'ReqStatus'
+      },
+  { id:            'EcdRequest',
+                purpose:       #STANDARD,
+                type:          #COLLECTION,
+                label:         'Employee Communication Data',
+                position:      10 },
+       { id:            'EmployeeData',
+                purpose:       #STANDARD,
+                type:          #IDENTIFICATION_REFERENCE,
+                label:         'Employee Data',
+                parentId: 'EcdRequest',
+                position:      10 },
+                       {
+                purpose:       #STANDARD,
+                type:          #FIELDGROUP_REFERENCE,
+                label:         'Communication Data',
+                parentId: 'EcdRequest',
+                position:      20,
+                targetQualifier: 'CommData' },
+
+              { id:            'Attachment',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Attachments',
+                position:      20,
+                targetElement: '_Attachment'},
+
+                { id:            'Approval',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Approvals',
+                position:      30,
+                targetElement: '_Approval'}
+  ]
+
+
+  @UI.hidden: true
+    RequestUuid;
+@UI: { lineItem:       [ { position: 10, importance: #HIGH } ] ,
+         identification: [ { position: 10 } ],
+         selectionField: [ { position: 10 } ] }
+  @EndUserText.label: 'Request No'
+    RequestId;
+    @UI: { lineItem:       [ { position: 20,  importance: #HIGH } ] ,
+         identification: [ { position: 20 } ] }
+        @EndUserText.label: 'Employee'
+        @UI.dataPoint: { qualifier: 'Employee',title: 'Employee Name'}
+    Pernr;
+     @UI.identification: [{ position: 30 }]
+     @EndUserText.label: 'Position'
+    PlansTxt;
+    @UI.identification: [{ position: 40 }]
+    @EndUserText.label: 'Department'
+    OrgehTxt;
+
+    @UI: { lineItem:       [ { position: 30, importance: #HIGH } ] ,
+         selectionField: [ { position: 20 } ] }
+          @UI.fieldGroup: [{ qualifier: 'CommData', position: 10 }]
+          @EndUserText.label: 'Communication Type'
+    CommunicationType;
+    @UI.hidden: true
+    CommunicationTypeText;
+    @UI: { lineItem:       [ { position: 40, importance: #HIGH } ] }
+         @UI.fieldGroup: [{ qualifier: 'CommData', position: 20 }]
+         @EndUserText.label: 'System ID'
+    SystemId;
+    @UI: { lineItem:       [ { position: 50, importance: #HIGH } ] ,
+         selectionField: [ { position: 30 } ] }
+         @UI.fieldGroup: [{ qualifier: 'CommData', position: 30 }]
+         @EndUserText.label: 'Begin Date'
+    Begda;
+      @UI: { lineItem:       [ { position: 60, importance: #HIGH } ]  }
+         @UI.fieldGroup: [{ qualifier: 'CommData', position: 40 }]
+         @EndUserText.label: 'Remarks'
+         @UI.multiLineText: true
+    Remarks;
+               @UI: {
+         selectionField: [ { position: 40 } ] }
+         @EndUserText.label: 'Status'
+    ReqStatus;
+    @UI: { lineItem:       [ { position: 70, importance: #HIGH ,criticality: 'statusCriticality'} ]}
+    @UI.dataPoint: { qualifier: 'ReqStatus',title: 'Request Status',criticality: 'statusCriticality'}
+    @EndUserText.label: 'Status'
+    ReqStatusText;
+    @UI.hidden: true
+    LocalCreatedBy;
+    @UI.identification: [{  position: 50}]
+    LocalCreatedAt;
+    @UI.hidden: true
+    LocalLastChangedBy;
+    @UI.identification: [{  position: 60}]
+    LocalLastChangedAt;
+    @UI.hidden: true
+    LastChangedAt;
+}

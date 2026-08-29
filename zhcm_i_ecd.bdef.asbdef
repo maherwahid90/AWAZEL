@@ -1,0 +1,110 @@
+managed implementation in class zbp_hcm_i_ecd unique;
+strict ( 2 );
+with draft;
+define behavior for zhcm_i_ecd alias ECD
+persistent table Zhcm_ecd_req
+with additional save
+draft table zhcm_dr_ecd
+lock master
+total etag LastChangedAt
+authorization master ( instance )
+etag master LocalLastChangedAt
+{
+  create;
+  update(features : instance);
+  delete(features : instance);
+  association _Attachment { create;with draft; }
+  association _Approval { create;with draft; }
+  determination setRequestNumber on save { create; }
+  determination retrieveSystemId on modify { create; field CommunicationType; }
+  side effects
+  {
+    field CommunicationType affects field SystemId;
+  }
+  validation validateEcd on save { create; field CommunicationType,Begda,SystemId; }
+  field ( mandatory) Pernr,Begda,CommunicationType,SystemId;
+  field ( numbering : managed, readonly ) RequestUuid;
+  field ( readonly ) LocalLastChangedAt,LocalCreatedAt;
+   field ( features : instance ) Pernr,PlansTxt,OrgehTxt,RequestId;
+  draft determine action Prepare{}
+ draft action resume;
+ draft action Edit;
+ draft action Activate optimized;
+ draft action Discard;
+
+  mapping for zhcm_ecd_req{
+ RequestUuid = request_uuid;
+    RequestId = request_id;
+    Pernr = pernr ;
+    Begda = begda;
+    CommunicationType = communication_type;
+    SystemId = system_id;
+    Remarks=remarks ;
+    ReqStatus= req_status;
+    LocalCreatedBy=local_created_by;
+
+    LocalCreatedAt=local_created_at ;
+    LocalLastChangedBy = local_last_changed_by;
+    LocalLastChangedAt = local_last_changed_at;
+    LastChangedAt=last_changed_at ;
+  }
+
+}
+
+define behavior for zhcm_i_ecd_attach alias _Attachment
+persistent table Zhcm_ecd_attach
+draft table zhcm_dr_ecd_at
+lock dependent by _Ecd
+authorization dependent by _Ecd
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+  field ( mandatory ) Attachment;
+  field ( readonly ) RequestUuid;
+  field ( readonly ) LocalLastChangedAt,LocalCreatedAt;
+  association _Ecd {with draft;}
+  field (numbering : managed,readonly) AttachmentUuid;
+  mapping for zhcm_ecd_attach{
+
+AttachmentUuid = attachment_uuid ;
+   RequestUuid =  request_uuid ;
+    Attachment = attachment ;
+    Mimetype = mimetype;
+    Filename = filename;
+    Comments = comments;
+        LocalCreatedBy=local_created_by;
+
+    LocalCreatedAt=local_created_at ;
+    LocalLastChangedBy = local_last_changed_by;
+    LocalLastChangedAt = local_last_changed_at;
+    LastChangedAt=last_changed_at ;
+
+  }
+}
+
+
+define behavior for zhcm_i_ecd_approvals alias _Approval
+persistent table zhcm_ecd_approv
+draft table zhcm_dr_ecd_aps
+lock dependent by _Ecd
+authorization dependent by _Ecd
+etag master ReceiveTs
+{
+  update(features : instance);
+  delete(features : instance);
+  field ( readonly ) RequestUuid,ApprovalSeq;
+  association _Ecd {with draft;}
+  mapping for zhcm_ecd_approv{
+
+   RequestUuid =  request_uuid ;
+    ApprovalSeq = approval_seq ;
+    ApprovalPernr = approval_pernr;
+    ApprovalName = approval_name;
+    ReceiveTs = receive_ts;
+    CompleteTs = complete_ts;
+    Status = status;
+   ApprovalComment = approval_comment;
+
+  }
+}

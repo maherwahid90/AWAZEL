@@ -1,0 +1,42 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Attachment',
+                     typeNamePlural: 'Attachments',
+                     title: { type: #STANDARD, value: 'Filename' } } }
+annotate entity zhcm_c_ecd_attach
+    with
+{
+@UI.facet: [ { id:            'Attachment',
+                 purpose:       #STANDARD,
+                 type:          #IDENTIFICATION_REFERENCE,
+                 label:         'Attachment',
+                 position:      10 } ]
+    @UI.hidden: true
+    AttachmentUuid;
+    @UI.hidden: true
+    RequestUuid;
+    @UI.hidden: true
+    Attachment;
+    @UI.hidden: true
+    Mimetype;
+   @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],
+                             identification: [ { position: 10 } ]
+         }
+         @EndUserText.label: 'File Name'
+    Filename;
+       @UI: { lineItem:       [ { position: 20, importance: #HIGH } ],
+                             identification: [ { position: 20 } ]
+         }
+         @EndUserText.label: 'Comments'
+         @UI.multiLineText: true
+    Comments;
+    @UI.hidden: true
+    LocalCreatedBy;
+    @UI.identification: [{ position: 30 }]
+    LocalCreatedAt;
+    @UI.hidden: true
+    LocalLastChangedBy;
+    @UI.hidden: true
+    LocalLastChangedAt;
+    @UI.hidden: true
+    LastChangedAt;
+}

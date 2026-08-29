@@ -1,0 +1,8 @@
+@EndUserText.label: 'Service Definition for Employee Communication Data'
+define service Zhcm_c_ecd_sd {
+  expose zhcm_c_ecd;
+  expose zhcm_c_ecd_attach;
+  expose zhcm_c_ecd_approvals;
+  expose zhcm_comm_type_view;
+  expose zhcm_employee_help;
+}

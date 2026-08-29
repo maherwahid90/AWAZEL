@@ -1,0 +1,25 @@
+@EndUserText.label : 'HCM Employee Communication Data Request'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zhcm_ecd_req {
+
+  key client            : mandt not null;
+  key request_uuid      : sysuuid_x16 not null;
+  request_id            : zhcm_req_no;
+  pernr                 : pernr_d;
+  begda                 : begda;
+  communication_type    : usrty;
+  system_id             : usrid;
+  remarks               : zhcm_req_remarks;
+  req_status            : zhcm_req_status;
+  local_created_by      : abp_creation_user;
+  local_created_at      : abp_creation_tstmpl;
+  local_last_changed_by : abp_locinst_lastchange_user;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+  return_code           : syst_subrc;
+  workitem_id           : sww_wiid;
+
+}

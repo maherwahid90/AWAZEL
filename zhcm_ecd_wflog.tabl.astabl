@@ -1,0 +1,14 @@
+@EndUserText.label : 'Employee Communication Data WF Log'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zhcm_ecd_wflog {
+
+  key client       : mandt not null;
+  key request_uuid : sysuuid_x16 not null;
+  key app_id       : zhcm_app_id not null;
+  return_code      : syst_subrc;
+  workitem_id      : sww_wiid;
+
+}
