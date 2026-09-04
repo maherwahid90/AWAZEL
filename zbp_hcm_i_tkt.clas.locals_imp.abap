@@ -67,13 +67,22 @@ CLASS lhc_TKT IMPLEMENTATION.
     " members, with Selected initially unset - the employee then ticks "Selected" for
     " whichever dependants actually need a ticket, and can still add further rows by hand
     " (create is enabled on _Member) for anyone not found in PA0021.
+    "
+    " NOTE ON APPROACH: this writes ZHCM_DR_TKT_MEM directly with a plain INSERT instead of
+    " going through "MODIFY ENTITIES ... CREATE BY \_Member". _Member is keyed by FAMILY_SEQ
+    " (not a UUID) and therefore declared "early numbering" in the BDEF, which routes every
+    " CREATE BY association through lhc__Member~earlynumbering_create - including this one,
+    " issued from a determination rather than the UI. That path kept dumping in the real
+    " system (first CX_ABAP_BEHV_RUNTIME_ERROR, then CX_CSP_ACT_RESPONSE even after fixing
+    " the batching bug in that handler). Writing straight into the draft table sidesteps
+    " that handler for this code path entirely. Manual "Add" from the Fiori UI still goes
+    " through earlynumbering_create - a UI-issued create has no other way to get FamilySeq
+    " assigned - so that method must stay in place for that path.
     READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
       ENTITY tkt
         FIELDS ( Pernr TicketType )
         WITH CORRESPONDING #( keys )
       RESULT DATA(tkts).
-
-    DATA member_create TYPE TABLE FOR CREATE zhcm_i_tkt\_Member.
 
     LOOP AT tkts INTO DATA(tkt_wa) WHERE TicketType = '02' OR TicketType = '03'.
 
@@ -95,24 +104,21 @@ CLASS lhc_TKT IMPLEMENTATION.
 
       CHECK family_it IS NOT INITIAL.
 
-      " NOTE: %is_draft must be set explicitly on this header line (not inside the
-      " %target rows) to match the parent instance's own draft state - omitting it here
-      " left this CBA (create-by-association) activity without a definite draft/active
-      " flag, which the framework's consistency check across the whole modify job
-      " reported as an "illegal mixture of ACTIVE and DRAFT" runtime dump
-      " (CX_ABAP_BEHV_RUNTIME_ERROR).
-      "
-      " FamilySeq is intentionally NOT supplied here: _Member is declared "early
-      " numbering" in the BDEF, so every create - including this one, issued from a
-      " determination rather than the UI - is routed through
-      " lhc__Member~earlynumbering_create below, which is the sole place FamilySeq gets
-      " assigned. Supplying it here too was redundant and, combined with a batching bug
-      " in that handler, caused a second dump (CX_CSP_ACT_RESPONSE - "handler returned
-      " neither FAILED nor MAPPED for a specific input instance") the first time more
-      " than one family member was auto-created in the same call.
-      APPEND INITIAL LINE TO member_create ASSIGNING FIELD-SYMBOL(<create_wa>).
-      <create_wa>-%tky      = tkt_wa-%tky.
-      <create_wa>-%is_draft = tkt_wa-%is_draft.
+      " The parent's own draft admin data (DRAFTUUID etc.) must be copied onto every child
+      " draft row so the framework recognizes these rows as belonging to the same draft -
+      " every composition child's admin include carries the same DRAFTUUID as the root.
+      SELECT SINGLE * FROM zhcm_dr_tkt
+        WHERE request_uuid = @tkt_wa-RequestUuid
+        INTO @DATA(root_draft).
+
+      DATA(next_seq) = 0.
+      SELECT SINGLE FROM zhcm_dr_tkt_mem
+        FIELDS MAX( family_seq )
+        WHERE request_uuid = @tkt_wa-RequestUuid
+        INTO @next_seq.
+
+      DATA member_rows TYPE STANDARD TABLE OF zhcm_dr_tkt_mem.
+      CLEAR member_rows.
 
       LOOP AT family_it INTO DATA(fam).
         SELECT SINGLE pspnm FROM pa3254 INTO @DATA(pspnm)
@@ -122,24 +128,25 @@ CLASS lhc_TKT IMPLEMENTATION.
           CLEAR pspnm.
         ENDIF.
 
-        APPEND VALUE #( %cid                 = |TKTMEM{ sy-uuid_c32 }|
-                         Selected             = abap_false
-                         Name                 = |{ fam-favor } { fam-fanam }|
-                         Birthdate            = fam-fgbdt
-                         PassportNo           = pspnm
-                         %control-Selected    = if_abap_behv=>mk-on
-                         %control-Name        = if_abap_behv=>mk-on
-                         %control-Birthdate   = if_abap_behv=>mk-on
-                         %control-PassportNo  = if_abap_behv=>mk-on )
-               TO <create_wa>-%target.
-      ENDLOOP.
-    ENDLOOP.
+        next_seq += 1.
 
-    CHECK member_create IS NOT INITIAL.
-    MODIFY ENTITIES OF zhcm_i_tkt IN LOCAL MODE
-      ENTITY tkt
-        CREATE BY \_Member
-        FROM member_create.
+        APPEND VALUE #( client       = sy-mandt
+                         request_uuid = tkt_wa-RequestUuid
+                         family_seq   = next_seq
+                         selected     = abap_false
+                         name         = |{ fam-favor } { fam-fanam }|
+                         gbdat        = fam-fgbdt
+                         passport_no  = pspnm
+                         admin        = root_draft-admin )
+               TO member_rows.
+      ENDLOOP.
+
+      CHECK member_rows IS NOT INITIAL.
+      INSERT zhcm_dr_tkt_mem FROM TABLE @member_rows.
+      IF sy-subrc <> 0.
+        APPEND VALUE #( %tky = tkt_wa-%tky ) TO failed-tkt.
+      ENDIF.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD validateTicket.
