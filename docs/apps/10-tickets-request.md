@@ -82,7 +82,7 @@ Key: `CLIENT`, `REQUEST_UUID`. Notable fields (as supplied):
 |---|---|---|
 | `REQUEST_ID` | `ZHCM_REQ_NO` | Sequential request number (max+1 pattern, same as every other app) |
 | `PERNR` | `PERNR_D` | Requesting employee |
-| `TICKET_TYPE` | `ZTICKET_TYPE` | Employee / Family / Both (exact value texts not confirmed — see open item) |
+| `TICKET_TYPE` | `ZTICKET_TYPE` | Employee (`'01'`) / Family (`'02'`) / Employee and Family (`'03'`) — confirmed against the real system; `_Member` auto-population and its validation trigger on `'02'`/`'03'` |
 | `BEGDA` / `ENDDA` | `BEGDA`/`ENDDA` | Travel period |
 | `TICKET_DIRECTION` | `ZTICKET_DIRECTION` | "Travel Ticket Entity/Direction" per the FS |
 | `TRAVEL_DESTINATION` | `ZTRAVEL_DESTINATION` | Travel destination |
@@ -112,10 +112,10 @@ was added; add one in `validateTicket` if that turns out to be needed).
 |---|---|---|
 | `FAMILY_SEQ` (key, with `REQUEST_UUID`) | `abap.int1` | **Not a UUID** — a per-request running line number, unlike every other child entity in this suite. See [Numbering ZHCM_TICK_MEMBER](#numbering-zhcm_tick_member-early-numbering) below. |
 | `SELECTED` | `boolean` | Employee ticks this for whichever auto-listed dependents actually need a ticket (see UX below) |
-| `NAME` | `char200` | Single free-text name field (not split first/last) |
-| `GBDAT` (exposed as `Birthdate`) | `gbdat` | Standard SAP birth-date field |
+| `NAME` | `char200` | Single free-text name field (not split first/last) — built from `PA0021-FAVOR` (family/last name) + `PA0021-FANAM` (first name), confirmed against the real system |
+| `GBDAT` (exposed as `Birthdate`) | `gbdat` | Standard SAP birth-date field, from `PA0021-FGBDT` |
 | `AGE` | `abap.dec(3,2)` | ⚠️ See [open item](#open-item-agepassport_no-field-types) below — this type can only hold ages up to 9.99 |
-| `PASSPORT_NO` | `p24_pspnm` | Country-specific (Saudi Arabia, `MOLGA=24`) passport number data element |
+| `PASSPORT_NO` | `p24_pspnm` | Country-specific (Saudi Arabia, `MOLGA=24`) passport number data element — **not** on `PA0021` itself; looked up per-member from `PA3254` (country-specific ID document infotype), joined on the same `PERNR`/`SUBTY`/`BEGDA`/`ENDDA` as the `PA0021` record |
 
 No `LOCAL_CREATED_BY`/`LOCAL_LAST_CHANGED_AT`/etc. on this table (unlike the attachment/header
 tables) — so its BDEF behavior block has **no `etag master` clause** (there is no field to use
@@ -125,10 +125,10 @@ as one).
 
 `populateMembers` (determination on `TicketType`) auto-lists **every** infotype 0021 (Family
 Member/Dependants) record valid today for the requester, one `ZHCM_TICK_MEMBER` row per
-dependent, `Selected = false` by default, whenever `TicketType` is `2`/`3`. The employee then
+dependent, `Selected = false` by default, whenever `TicketType` is `'02'`/`'03'`. The employee then
 **ticks `Selected`** for whichever dependents actually need a ticket for this trip, and can still
 add further rows by hand (`create` is enabled on `_Member`) for anyone not found in PA0021.
-`validateTicket` requires **at least one `Selected = true` member** when `TicketType` is `2`/`3`
+`validateTicket` requires **at least one `Selected = true` member** when `TicketType` is `'02'`/`'03'`
 — simply having auto-populated rows present is not enough.
 
 ## Behavior definition highlights (`zhcm_i_tkt.bdef`)
@@ -150,31 +150,43 @@ Same shape as Leave Request/Overtime: `strict(2)`, `with draft`, `with additiona
 Every other child entity in this app suite (`_Attachment`, `RequestUuid` itself) uses RAP's
 built-in `field ( numbering : managed, readonly )` UUID generation. `ZHCM_TICK_MEMBER`'s key
 field `FAMILY_SEQ` is an `INT1` running line number instead, which that mechanism cannot
-auto-generate. Two different paths assign it:
+auto-generate. Because of that, `_Member`'s behavior block is declared **`early numbering`** in
+the BDEF, which routes **every** create of a `_Member` instance — both rows the employee adds by
+hand via the Fiori Elements "Add" button *and* rows the `populateMembers` determination creates
+server-side via `MODIFY ENTITIES ... CREATE BY \_Member` — through a single handler,
+`lhc__Member~earlynumbering_create` (`FOR NUMBERING`), which is the sole place `FamilySeq` gets
+assigned.
 
-* **Auto-populated rows** (from `populateMembers`): the determination itself builds the create
-  request and assigns `FamilySeq` directly (a simple per-request counter) — no special
-  machinery needed, since the server-side code already controls the full row.
-* **Rows the employee adds by hand** via the Fiori Elements "Add" button: the UI doesn't know
-  the next sequence number, so the entity is declared `early numbering` in the BDEF, and
-  `zbp_hcm_i_tkt` implements `lhc__Member~earlynumbering_create` (`FOR NUMBERING`) to compute
-  `MAX(family_seq) + 1` per request and assign it before the row is created.
+That handler seeds a running counter per `RequestUuid` **once** from
+`SELECT MAX( family_seq ) FROM zhcm_tick_member`, then increments it **in memory** for every row
+of that request seen in the current call, using a `HASHED TABLE OF ... WITH UNIQUE KEY
+requestuuid` to track the per-request counter across the whole batch. This matters because
+`populateMembers` typically creates several `_Member` siblings for the same request in one call
+(one per PA0021 dependent) — a naive per-row `SELECT MAX(family_seq) + 1` re-query cannot see
+sibling rows still being created in the same call (they aren't persisted yet), so every sibling
+would be assigned the same `FamilySeq`, and the framework would be unable to fully map the batch.
 
-**This early-numbering handler is the one piece of RAP code in this app that could not be
-verified against a real ABAP compiler in this session** — the general shape (a `FOR NUMBERING`
-method building a `mapped-_member` table keyed by `%cid`/`%key`/`%is_draft`) matches the
-documented RAP pattern, but re-check it against ADT's syntax check/type proposal when you
-activate this object, and adjust if the exact field names differ.
+**This was hit live**, twice, while testing against the real system, and both root causes are
+now fixed:
+
+1. `CX_ABAP_BEHV_RUNTIME_ERROR` ("Illegal mixture of ACTIVE and DRAFT in a %TARGET table of a
+   CBA activity") — the `CREATE BY \_Member` header row built by `populateMembers` set `%tky` but
+   not `%is_draft`. Fixed by setting `%is_draft` explicitly on the header line, matching the
+   parent instance's own draft state.
+2. `CX_CSP_ACT_RESPONSE` ("handler returned neither FAILED nor MAPPED for a specific input
+   instance", raised from `CL_CSP_ACT_EVAL_NUMBERING_RESP`) — the batching bug described above:
+   `earlynumbering_create` was re-querying `MAX(family_seq)` per input row instead of tracking it
+   in memory across the batch. Fixed as described above.
 
 ## Business logic (`ZBP_HCM_I_TKT`)
 
 * **`setRequestNumber`** — identical max+1 pattern over `ZHCM_TICKET_REQ`.
 * **`populateMembers`** — see [Member selection UX](#member-selection-ux) above. Concatenates
-  `PA0021-FANAM` and `PA0021-NACHN` into the single `Name` field (verify the actual "last/family
-  name" field on your PA0021 subtype structure — this repeats the same open item flagged in the
-  original design).
+  `PA0021-FAVOR` (family/last name) and `PA0021-FANAM` (first name) into the single `Name` field,
+  and looks up `PASSPORT_NO` per member from `PA3254` (see [data model](#zhcm_tick_member--familycompanion-data)
+  above) — both confirmed against the real system.
 * **`validateTicket`** (validation on save):
-  1. If `TicketType` is `2`/`3`, at least one `_Member` row must have `Selected = true` —
+  1. If `TicketType` is `'02'`/`'03'`, at least one `_Member` row must have `Selected = true` —
      message `ZHCM_MSGS 011`.
   2. `Endda < Begda` → message `003` (reused).
   3. No other **own** ticket request (`req_status IN ('1','2','4')`) with an overlapping
@@ -246,16 +258,12 @@ Request/Overtime.
    rule = `ZHCM_GET_APPROVALS_IN_USER_DEC` (already extended for `APP_ID = '03'`), and add its
    tasks to `SWFVISU` (Task Visualization) so the approval work item surfaces correctly in Fiori
    My Inbox; have that workflow's "approved" step call `ZHCM_TICKET_REPLICATE_HR`.
-3. Confirm the real domain name behind `ZTICKET_TYPE` (assumed `ZTICKET_TYPE`) and its fixed
-   values, and adjust `zhcm_ticket_type_view` if it differs.
+3. Confirm the real domain name behind `ZTICKET_TYPE` (assumed `ZTICKET_TYPE`); its fixed values
+   (`'01'`/`'02'`/`'03'`) are already confirmed against the real system and used consistently by
+   `populateMembers`/`validateTicket`.
 4. Fix the `AGE` field type on `ZHCM_TICK_MEMBER` (see [open item](#open-item-agepassport_no-field-types)) before activating `calculateAge`.
-5. Verify the PA0021 "last/family name" field used by `populateMembers` against the real subtype
-   structure.
-6. Re-check the `earlynumbering_create` method (see
-   [Numbering ZHCM_TICK_MEMBER](#numbering-zhcm_tick_member-early-numbering)) against ADT's
-   syntax check — it's the one piece of code in this app not verified against a live compiler.
-7. Generate the remaining Fiori app scaffold (`Component.js`, `index.html`, `i18n`, local mock
+5. Generate the remaining Fiori app scaffold (`Component.js`, `index.html`, `i18n`, local mock
    service files, UI5 ABAP repository mapping) with `@sap/generator-fiori:lrop` pointed at
    `ZHCM_C_TKT_SB` — only `manifest.json` is hand-authored here.
-8. Add a Fiori Launchpad catalog tile/semantic object (`zhcm_tkt_req-DISPLAY`), same as
+6. Add a Fiori Launchpad catalog tile/semantic object (`zhcm_tkt_req-DISPLAY`), same as
    `catalog1.PNG`/`catalog2.PNG` show for the existing apps.

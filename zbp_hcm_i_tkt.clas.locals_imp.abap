@@ -75,7 +75,7 @@ CLASS lhc_TKT IMPLEMENTATION.
 
     DATA member_create TYPE TABLE FOR CREATE zhcm_i_tkt\_Member.
 
-    LOOP AT tkts INTO DATA(tkt_wa) WHERE TicketType = '2' OR TicketType = '3'.
+    LOOP AT tkts INTO DATA(tkt_wa) WHERE TicketType = '02' OR TicketType = '03'.
 
       READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
         ENTITY tkt BY \_Member
@@ -83,11 +83,11 @@ CLASS lhc_TKT IMPLEMENTATION.
         RESULT DATA(existing_members).
       CHECK existing_members IS INITIAL.
 
-      " NOTE: PA0021 (Family Member/Dependants) field names - verify the actual subtype
-      " structure/field names on the target system before activating (FANAM = first name is
-      " a standard field; the "last/family name" field varies by configuration - adjust the
-      " SELECT below, e.g. NACHN, if it differs).
-      SELECT pernr, subty, fanam, nachn, fgbdt, pspnm
+      " PA0021 (Family Member/Dependants) name field confirmed against the real system:
+      " FAVOR (family/last name) + FANAM (first name). Passport number is not on PA0021
+      " itself - it comes from PA3254 (country-specific ID document infotype), joined on
+      " the same PERNR/SUBTY/BEGDA/ENDDA as the PA0021 record.
+      SELECT pernr, subty, fanam, favor, fgbdt, begda, endda
         FROM pa0021
         WHERE pernr = @tkt_wa-Pernr
           AND begda <= @sy-datum AND endda >= @sy-datum
@@ -95,26 +95,44 @@ CLASS lhc_TKT IMPLEMENTATION.
 
       CHECK family_it IS NOT INITIAL.
 
-      " NOTE: %is_draft must be set explicitly on this header line to match the parent
-      " instance's own draft state (tkt_wa-%is_draft) - omitting it left this CBA
-      " (create-by-association) activity without a definite draft/active flag, which the
-      " framework's consistency check across the whole modify job then reported as an
-      " "illegal mixture of ACTIVE and DRAFT" runtime dump (CX_ABAP_BEHV_RUNTIME_ERROR)
-      " the first time this determination actually created rows.
-      APPEND VALUE #( %tky      = tkt_wa-%tky
-                       %is_draft = tkt_wa-%is_draft
-                       %target   = VALUE #( FOR fam IN family_it INDEX INTO i (
-                                       %cid                 = |TKTMEM{ sy-uuid_c32 }|
-                                       %key-FamilySeq        = i
-                                       Selected             = abap_false
-                                       Name                 = |{ fam-fanam } { fam-nachn }|
-                                       Birthdate            = fam-fgbdt
-                                       PassportNo           = fam-pspnm
-                                       %control-Selected    = if_abap_behv=>mk-on
-                                       %control-Name        = if_abap_behv=>mk-on
-                                       %control-Birthdate   = if_abap_behv=>mk-on
-                                       %control-PassportNo  = if_abap_behv=>mk-on ) ) )
-             TO member_create.
+      " NOTE: %is_draft must be set explicitly on this header line (not inside the
+      " %target rows) to match the parent instance's own draft state - omitting it here
+      " left this CBA (create-by-association) activity without a definite draft/active
+      " flag, which the framework's consistency check across the whole modify job
+      " reported as an "illegal mixture of ACTIVE and DRAFT" runtime dump
+      " (CX_ABAP_BEHV_RUNTIME_ERROR).
+      "
+      " FamilySeq is intentionally NOT supplied here: _Member is declared "early
+      " numbering" in the BDEF, so every create - including this one, issued from a
+      " determination rather than the UI - is routed through
+      " lhc__Member~earlynumbering_create below, which is the sole place FamilySeq gets
+      " assigned. Supplying it here too was redundant and, combined with a batching bug
+      " in that handler, caused a second dump (CX_CSP_ACT_RESPONSE - "handler returned
+      " neither FAILED nor MAPPED for a specific input instance") the first time more
+      " than one family member was auto-created in the same call.
+      APPEND INITIAL LINE TO member_create ASSIGNING FIELD-SYMBOL(<create_wa>).
+      <create_wa>-%tky      = tkt_wa-%tky.
+      <create_wa>-%is_draft = tkt_wa-%is_draft.
+
+      LOOP AT family_it INTO DATA(fam).
+        SELECT SINGLE pspnm FROM pa3254 INTO @DATA(pspnm)
+          WHERE pernr = @fam-pernr AND subty = @fam-subty
+            AND begda = @fam-begda AND endda = @fam-endda.
+        IF sy-subrc <> 0.
+          CLEAR pspnm.
+        ENDIF.
+
+        APPEND VALUE #( %cid                 = |TKTMEM{ sy-uuid_c32 }|
+                         Selected             = abap_false
+                         Name                 = |{ fam-favor } { fam-fanam }|
+                         Birthdate            = fam-fgbdt
+                         PassportNo           = pspnm
+                         %control-Selected    = if_abap_behv=>mk-on
+                         %control-Name        = if_abap_behv=>mk-on
+                         %control-Birthdate   = if_abap_behv=>mk-on
+                         %control-PassportNo  = if_abap_behv=>mk-on )
+               TO <create_wa>-%target.
+      ENDLOOP.
     ENDLOOP.
 
     CHECK member_create IS NOT INITIAL.
@@ -135,7 +153,7 @@ CLASS lhc_TKT IMPLEMENTATION.
     LOOP AT tkts INTO DATA(tkt_wa).
 
       " At least one selected member is required for ticket types that include family.
-      IF tkt_wa-TicketType = '2' OR tkt_wa-TicketType = '3'.
+      IF tkt_wa-TicketType = '02' OR tkt_wa-TicketType = '03'.
         READ TABLE tkts_member TRANSPORTING NO FIELDS
           WITH KEY %tky = tkt_wa-%tky selected = abap_true.
         IF sy-subrc <> 0.
@@ -241,35 +259,45 @@ CLASS lhc__Member IMPLEMENTATION.
     " ZHCM_TICK_MEMBER's key includes FAMILY_SEQ (a running line number per request), unlike
     " every UUID-keyed child elsewhere in this suite - so it cannot use the framework's
     " built-in "numbering: managed" UUID generation and needs this early-numbering handler
-    " instead, for rows the *employee* creates by hand via the Fiori Elements "Add" button
-    " (rows created by the populateMembers determination already assign FamilySeq themselves
-    " and never reach this method). This method's exact API shape (the %cid/%key/%is_draft
-    " fields of the `mapped-_member` result) should be re-checked against ADT's type
-    " proposal/syntax check when activated - it is the one part of this app's RAP code that
-    " could not be verified against a real compiler in this session.
+    " instead. Because _Member is declared "early numbering" in the BDEF, ALL creates of
+    " _Member instances go through this method - both rows the employee adds by hand via
+    " the Fiori Elements "Add" button AND rows created by the populateMembers
+    " determination's own MODIFY ENTITIES ... CREATE BY \_Member call.
+    "
+    " IMPORTANT: entities may contain several rows for the SAME RequestUuid in one call
+    " (e.g. every PA0021 dependant populateMembers auto-creates in a single batch). A
+    " naive per-row "SELECT MAX(family_seq) ... + 1" re-query does not see sibling rows
+    " still being created in the SAME call (they aren't persisted yet), so every sibling
+    " would be assigned the identical FamilySeq - the framework then can't fully map the
+    " batch and dumps with CX_CSP_ACT_RESPONSE ("handler returned neither FAILED nor
+    " MAPPED for a specific input instance"). Fixed here by seeding a running counter per
+    " RequestUuid ONCE from the database, then incrementing it in memory for every row of
+    " that request seen in this call.
+    TYPES: BEGIN OF ty_max,
+             requestuuid TYPE sysuuid_x16,
+             max_seq     TYPE i,
+           END OF ty_max.
+    DATA max_by_request TYPE HASHED TABLE OF ty_max WITH UNIQUE KEY requestuuid.
+
     LOOP AT entities INTO DATA(entity).
+      ASSIGN max_by_request[ requestuuid = entity-RequestUuid ] TO FIELD-SYMBOL(<max_wa>).
+      IF sy-subrc <> 0.
+        SELECT SINGLE FROM zhcm_tick_member
+          FIELDS MAX( family_seq )
+          WHERE request_uuid = @entity-RequestUuid
+          INTO @DATA(db_max_seq).
 
-      SELECT SINGLE FROM zhcm_tick_member
-        FIELDS MAX( family_seq )
-        WHERE request_uuid = @entity-RequestUuid
-        INTO @DATA(max_seq).
+        INSERT VALUE #( requestuuid = entity-RequestUuid max_seq = db_max_seq )
+          INTO TABLE max_by_request ASSIGNING <max_wa>.
+      ENDIF.
 
-      READ ENTITIES OF zhcm_i_tkt IN LOCAL MODE
-        ENTITY tkt BY \_Member
-        ALL FIELDS WITH VALUE #( ( RequestUuid = entity-RequestUuid ) )
-        RESULT DATA(existing_members).
-
-      LOOP AT existing_members INTO DATA(exist_wa) WHERE FamilySeq > max_seq.
-        max_seq = exist_wa-FamilySeq.
-      ENDLOOP.
-
-      max_seq += 1.
+      <max_wa>-max_seq += 1.
 
       mapped-_member = VALUE #( BASE mapped-_member (
                                     %cid           = entity-%cid
                                     %key           = entity-%key
                                     %is_draft      = entity-%is_draft
-                                    FamilySeq      = max_seq ) ).
+                                    FamilySeq      = <max_wa>-max_seq ) ).
     ENDLOOP.
   ENDMETHOD.
 
