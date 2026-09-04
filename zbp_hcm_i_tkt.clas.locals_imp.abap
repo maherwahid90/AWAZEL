@@ -95,22 +95,26 @@ CLASS lhc_TKT IMPLEMENTATION.
 
       CHECK family_it IS NOT INITIAL.
 
-      DATA(next_seq) = 0.
-      LOOP AT family_it INTO DATA(fam).
-        next_seq += 1.
-        APPEND VALUE #( %tky                = tkt_wa-%tky
-                         %target            = VALUE #( ( %cid          = |TKTMEM{ sy-uuid_c32 }|
-                                                          %key-FamilySeq = next_seq
-                                                          Selected      = abap_false
-                                                          Name          = |{ fam-fanam } { fam-nachn }|
-                                                          Birthdate     = fam-fgbdt
-                                                          PassportNo    = fam-pspnm
-                                                          %control-Selected   = if_abap_behv=>mk-on
-                                                          %control-Name       = if_abap_behv=>mk-on
-                                                          %control-Birthdate  = if_abap_behv=>mk-on
-                                                          %control-PassportNo = if_abap_behv=>mk-on ) ) )
-               TO member_create.
-      ENDLOOP.
+      " NOTE: %is_draft must be set explicitly on this header line to match the parent
+      " instance's own draft state (tkt_wa-%is_draft) - omitting it left this CBA
+      " (create-by-association) activity without a definite draft/active flag, which the
+      " framework's consistency check across the whole modify job then reported as an
+      " "illegal mixture of ACTIVE and DRAFT" runtime dump (CX_ABAP_BEHV_RUNTIME_ERROR)
+      " the first time this determination actually created rows.
+      APPEND VALUE #( %tky      = tkt_wa-%tky
+                       %is_draft = tkt_wa-%is_draft
+                       %target   = VALUE #( FOR fam IN family_it INDEX INTO i (
+                                       %cid                 = |TKTMEM{ sy-uuid_c32 }|
+                                       %key-FamilySeq        = i
+                                       Selected             = abap_false
+                                       Name                 = |{ fam-fanam } { fam-nachn }|
+                                       Birthdate            = fam-fgbdt
+                                       PassportNo           = fam-pspnm
+                                       %control-Selected    = if_abap_behv=>mk-on
+                                       %control-Name        = if_abap_behv=>mk-on
+                                       %control-Birthdate   = if_abap_behv=>mk-on
+                                       %control-PassportNo  = if_abap_behv=>mk-on ) ) )
+             TO member_create.
     ENDLOOP.
 
     CHECK member_create IS NOT INITIAL.
