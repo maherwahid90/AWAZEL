@@ -7,7 +7,8 @@ association to parent zhcm_i_tkt as _Ticket
     on $projection.RequestUuid = _Ticket.RequestUuid
 {
     key request_uuid as RequestUuid,
-    key family_seq as FamilySeq,
+    key family_uuid as FamilyUuid,
+    family_seq as FamilySeq,
     selected as Selected,
     name as Name,
     gbdat as Birthdate,

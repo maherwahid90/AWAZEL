@@ -38,7 +38,7 @@ Both fields use search help `PREM` (standard personnel number search help).
 
 | Field | Type | Meaning |
 |---|---|---|
-| `APP_ID` (key) | `ZHCM_APP_ID` | `01` Leave Request · `02` Overtime Request · `03` Tickets Request · `04` Employee Communication Data (extend for new apps) |
+| `APP_ID` (key) | `ZHCM_APP_ID` | `01` Leave Request · `02` Overtime Request · `04` Employee Communication Data · `07` Tickets Request (extend for new apps) |
 | `APPROVER_SEQ` (key) | `ZHCM_APPROV_SEQ` | Sequence number of this approval level (1, 2, 3, …) |
 | `APPROVER_TYPE` | `ZHCM_APPROVER_TYPE` | `01` Direct Manager · `02` Employee No. · `03` Fixed Position · `04` Rule |
 | `PLANS` | `PLANS` | Used when `APPROVER_TYPE = 03` |
@@ -150,7 +150,8 @@ Approver decision → (outside this repo's scope: presumably updates ZHCM_*_APPR
 ```
 
 This checklist has since been followed for real by
-[Tickets Request](10-tickets-request.md) (`APP_ID = '03'`) and
+[Tickets Request](10-tickets-request.md) (`APP_ID = '07'`, workflow `WS95000009` — renumbered
+from the original `'03'`/`WS95000004` once other apps claimed `03`/`05`/`06` in the meantime) and
 [Employee Communication Data](11-employee-communication-data.md) (`APP_ID = '04'`) — see those
 documents for concrete, worked examples of every step below.
 

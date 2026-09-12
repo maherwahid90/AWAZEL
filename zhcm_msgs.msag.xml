@@ -80,6 +80,12 @@
      <MSGNR>011</MSGNR>
      <TEXT>At least one family member is required for this tickets type.</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZHCM_MSGS</ARBGB>
+     <MSGNR>018</MSGNR>
+     <TEXT>At least one family member is required for this tickets type.</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

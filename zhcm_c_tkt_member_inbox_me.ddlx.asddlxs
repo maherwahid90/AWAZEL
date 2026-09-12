@@ -2,7 +2,7 @@
 @UI: { headerInfo: { typeName: 'Family Member',
                      typeNamePlural: 'Family Members',
                      title: { type: #STANDARD, value: 'Name' } } }
-annotate entity zhcm_c_tkt_member
+annotate entity ZHCM_C_TKT_MEMBER_INBOX
     with
 {
 @UI.facet: [ { id:            'Member',
@@ -12,8 +12,6 @@ annotate entity zhcm_c_tkt_member
                  position:      10 } ]
     @UI.hidden: true
     RequestUuid;
-    @UI.hidden: true
-    FamilyUuid;
     @UI.hidden: true
     FamilySeq;
    @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],

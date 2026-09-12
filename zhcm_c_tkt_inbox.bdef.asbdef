@@ -1,0 +1,44 @@
+projection;
+strict ( 2 );
+use draft;
+
+define behavior for ZHCM_C_TKT_INBOX //alias <alias_name>
+{
+//  use create;
+//  use update;
+//  use delete;
+
+  use action Prepare;
+  use action resume;
+  use action Edit;
+  use action Activate;
+  use action Discard;
+
+  use association _Attachment { create; with draft; }
+  use association _Member { create; with draft; }
+  use association _Approval { create; with draft; }
+}
+
+define behavior for ZHCM_C_TKT_APPROVALS_INBOX //alias <alias_name>
+{
+//  use update;
+//  use delete;
+
+  use association _Ticket { with draft; }
+}
+
+define behavior for ZHCM_C_TKT_ATTACH_INBOX //alias <alias_name>
+{
+  use update;
+  use delete;
+
+  use association _Ticket { with draft; }
+}
+
+define behavior for ZHCM_C_TKT_MEMBER_INBOX //alias <alias_name>
+{
+//  use update;
+//  use delete;
+
+  use association _Ticket { with draft; }
+}

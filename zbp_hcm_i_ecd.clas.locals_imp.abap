@@ -130,13 +130,19 @@ ENDCLASS.
 CLASS lhc__Attachment IMPLEMENTATION.
 
   METHOD get_instance_features.
+    " %tky must exist as a row in result BEFORE it can be addressed via a table expression -
+    " writing straight into a table expression on an empty table raises
+    " CX_SY_ITAB_LINE_NOT_FOUND (ITAB_LINE_NOT_FOUND) the first time this handler is actually
+    " exercised (same defect found and fixed in Tickets Request's equivalent handlers).
     LOOP AT keys INTO DATA(key).
-      result[ %key = CORRESPONDING #( key ) ]-%update = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
-                                 THEN if_abap_behv=>fc-o-enabled
-                                 ELSE if_abap_behv=>fc-o-disabled ).
-      result[ %key = CORRESPONDING #( key ) ]-%delete = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
-                                 THEN if_abap_behv=>fc-o-enabled
-                                 ELSE if_abap_behv=>fc-o-disabled ).
+      APPEND VALUE #( %tky    = key-%tky
+                       %update = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
+                                          THEN if_abap_behv=>fc-o-enabled
+                                          ELSE if_abap_behv=>fc-o-disabled )
+                       %delete = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
+                                          THEN if_abap_behv=>fc-o-enabled
+                                          ELSE if_abap_behv=>fc-o-disabled ) )
+        TO result.
     ENDLOOP.
   ENDMETHOD.
 
@@ -153,13 +159,19 @@ ENDCLASS.
 CLASS lhc__Approval IMPLEMENTATION.
 
   METHOD get_instance_features.
+    " %tky must exist as a row in result BEFORE it can be addressed via a table expression -
+    " writing straight into a table expression on an empty table raises
+    " CX_SY_ITAB_LINE_NOT_FOUND (ITAB_LINE_NOT_FOUND) the first time this handler is actually
+    " exercised (same defect found and fixed in Tickets Request's equivalent handlers).
     LOOP AT keys INTO DATA(key).
-      result[ %key = CORRESPONDING #( key ) ]-%update = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
-                                 THEN if_abap_behv=>fc-o-enabled
-                                 ELSE if_abap_behv=>fc-o-disabled ).
-      result[ %key = CORRESPONDING #( key ) ]-%delete = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
-                                 THEN if_abap_behv=>fc-o-enabled
-                                 ELSE if_abap_behv=>fc-o-disabled ).
+      APPEND VALUE #( %tky    = key-%tky
+                       %update = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
+                                          THEN if_abap_behv=>fc-o-enabled
+                                          ELSE if_abap_behv=>fc-o-disabled )
+                       %delete = COND #( WHEN key-%is_draft = if_abap_behv=>mk-on
+                                          THEN if_abap_behv=>fc-o-enabled
+                                          ELSE if_abap_behv=>fc-o-disabled ) )
+        TO result.
     ENDLOOP.
   ENDMETHOD.
 

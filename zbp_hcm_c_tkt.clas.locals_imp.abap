@@ -20,12 +20,19 @@ CLASS lhc_TKT IMPLEMENTATION.
       SELECT SINGLE pernr FROM pa0105 INTO @<tkt_wa>-pernr
         WHERE usrid = @sy-uname AND begda <= @sy-datum AND endda >= @sy-datum AND usrty = '0001'.
       IF sy-subrc = 0.
-        " ename/PlansTxt/OrgehTxt/hiredate are association-sourced (from zhcm_employee_help),
-        " not persisted columns on ZHCM_TICKET_REQ - setting them here just seeds the
+        CALL FUNCTION 'RP_GET_HIRE_DATE'
+          EXPORTING
+            persnr          = <tkt_wa>-pernr
+            check_infotypes = '0000'
+          IMPORTING
+            hiredate        = <tkt_wa>-hiredate.
+        " ename/PlansTxt/OrgehTxt are association-sourced (from zhcm_employee_help), not
+        " persisted columns on ZHCM_TICKET_REQ - setting them here just seeds the
         " create-response buffer for immediate UI feedback, exactly like Leave Request's
-        " augment_create does for the same fields.
-        SELECT SINGLE ename, PlansTxt, orgehTxt, hiredate FROM zhcm_employee_help
-          INTO ( @<tkt_wa>-ename, @<tkt_wa>-PlansTxt, @<tkt_wa>-OrgehTxt, @<tkt_wa>-hiredate )
+        " augment_create does for the same fields. hiredate is now sourced directly via
+        " RP_GET_HIRE_DATE rather than zhcm_employee_help's virtual element.
+        SELECT SINGLE ename, PlansTxt, orgehTxt FROM zhcm_employee_help
+          INTO ( @<tkt_wa>-ename, @<tkt_wa>-PlansTxt, @<tkt_wa>-OrgehTxt )
           WHERE pernr = @<tkt_wa>-Pernr.
       ENDIF.
 

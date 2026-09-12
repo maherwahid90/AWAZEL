@@ -1,11 +1,11 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Consumption view for Tickets Request Members'
+@EndUserText.label: 'Consumption view for Tickets Req Members'
 @Metadata.ignorePropagatedAnnotations: true
 @Metadata.allowExtensions: true
-define view entity zhcm_c_tkt_member as projection on zhcm_i_tkt_member
+define view entity ZHCM_C_TKT_MEMBER_INBOX as projection on zhcm_i_tkt_member
 {
-    key RequestUuid,
     key FamilyUuid,
+    RequestUuid,
     FamilySeq,
     Selected,
     Name,
@@ -14,5 +14,5 @@ define view entity zhcm_c_tkt_member as projection on zhcm_i_tkt_member
     PassportNo,
 
     /* Associations */
-    _Ticket :redirected to parent zhcm_c_tkt
+    _Ticket :redirected to parent zhcm_c_tkt_INBOX
 }

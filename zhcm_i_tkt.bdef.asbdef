@@ -23,7 +23,7 @@ etag master LocalLastChangedAt
     field TicketType affects entity _Member;
   }
   validation validateTicket on save { create; field TicketType,Begda, Endda; }
-  field ( mandatory) Pernr,TicketType,Begda,Endda;
+  field ( mandatory) Pernr,TicketType,Begda,Endda,TicketDirection,TravelDestination;
   field ( numbering : managed, readonly ) RequestUuid;
   field ( readonly ) LocalLastChangedAt,LocalCreatedAt;
    field ( features : instance ) Pernr,hiredate,PlansTxt,OrgehTxt,RequestId;
@@ -88,21 +88,18 @@ AttachmentUuid = attachment_uuid ;
 }
 
 define behavior for zhcm_i_tkt_member alias _Member
-  early numbering
 persistent table Zhcm_tick_member
 draft table zhcm_dr_tkt_mem
 lock dependent by _Ticket
 authorization dependent by _Ticket
 {
-  create;
-  update;
-  delete;
-  determination calculateAge on modify { create; field Birthdate; }
-  field ( mandatory ) Name;
-  field ( readonly ) RequestUuid,FamilySeq,Age;
+  update (features : instance);
+  delete (features : instance);
+  field ( readonly ) RequestUuid,FamilySeq,Age,Name,Birthdate,PassportNo;
   association _Ticket {with draft;}
+  field (numbering : managed,readonly) FamilyUuid;
   mapping for zhcm_tick_member{
-
+   FamilyUuid = family_uuid;
    RequestUuid =  request_uuid ;
     FamilySeq = family_seq ;
     Selected = selected;

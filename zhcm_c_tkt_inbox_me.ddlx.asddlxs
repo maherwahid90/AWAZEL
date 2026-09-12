@@ -1,0 +1,142 @@
+@Metadata.layer: #CORE
+@UI: { headerInfo: { typeName: 'Tickets Request',
+                     typeNamePlural: 'Tickets Requests',
+                     title: { type: #STANDARD, value: 'TicketTypeText' } ,
+                     description: {
+                     value: 'RequestId'
+        },typeImageUrl: 'sap-icon://flight'
+        },
+
+       presentationVariant: [{ sortOrder: [{ by: 'RequestId', direction: #DESC }] }] }
+
+annotate entity ZHCM_C_TKT_INBOX
+    with
+{
+
+@UI.facet: [
+   {
+          label: 'Employee Data',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 10,
+          targetQualifier: 'Employee'
+      },
+      {
+          label: 'Request Status',
+          purpose: #HEADER,
+          type: #DATAPOINT_REFERENCE,
+          position: 20,
+          targetQualifier: 'ReqStatus'
+      },
+  { id:            'TicketsRequest',
+                purpose:       #STANDARD,
+                type:          #COLLECTION,
+                label:         'Tickets Request',
+                position:      10 },
+       { id:            'EmployeeData',
+                purpose:       #STANDARD,
+                type:          #IDENTIFICATION_REFERENCE,
+                label:         'Employee Data',
+                parentId: 'TicketsRequest',
+                position:      10 },
+                       {
+                purpose:       #STANDARD,
+                type:          #FIELDGROUP_REFERENCE,
+                label:         'Ticket Data',
+                parentId: 'TicketsRequest',
+                position:      20,
+                targetQualifier: 'TravelData' },
+
+              { id:            'Attachment',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Attachments',
+                position:      20,
+                targetElement: '_Attachment'},
+
+              { id:            'Member',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Family Members',
+                position:      30,
+                targetElement: '_Member'},
+
+                { id:            'Approval',
+                purpose:       #STANDARD,
+                type:          #LINEITEM_REFERENCE,
+                label:         'Approvals',
+                position:      40,
+                targetElement: '_Approval'}
+  ]
+
+
+  @UI.hidden: true
+    RequestUuid;
+@UI: { lineItem:       [ { position: 10, importance: #HIGH } ] ,
+         identification: [ { position: 10 } ],
+         selectionField: [ { position: 10 } ] }
+  @EndUserText.label: 'Request No'
+    RequestId;
+    @UI: { lineItem:       [ { position: 20,  importance: #HIGH } ] ,
+         identification: [ { position: 20 } ] }
+        @EndUserText.label: 'Employee'
+        @UI.dataPoint: { qualifier: 'Employee',title: 'Employee Name'}
+    Pernr;
+     @UI.identification: [{ position: 30 }]
+     @EndUserText.label: 'Position'
+    PlansTxt;
+    @UI.identification: [{ position: 40 }]
+    @EndUserText.label: 'Department'
+    OrgehTxt;
+
+    @UI.identification: [{ position: 50 }]
+    @EndUserText.label: 'Hire Date'
+    hiredate;
+    @UI: { lineItem:       [ { position: 30, importance: #HIGH } ] ,
+         selectionField: [ { position: 20 } ] }
+          @UI.fieldGroup: [{ qualifier: 'TravelData', position: 10 }]
+          @EndUserText.label: 'Tickets Type'
+    TicketType;
+    @UI: { lineItem:       [ { position: 40, importance: #HIGH } ] ,
+         selectionField: [ { position: 30 } ] }
+         @UI.fieldGroup: [{ qualifier: 'TravelData', position: 20 }]
+         @EndUserText.label: 'Start Date'
+    Begda;
+    @UI: { lineItem:       [ { position: 50, importance: #HIGH } ] ,
+         selectionField: [ { position: 40 } ] }
+         @UI.fieldGroup: [{ qualifier: 'TravelData', position: 30 }]
+         @EndUserText.label: 'End Date'
+    Endda;
+    @UI.fieldGroup: [{ qualifier: 'TravelData', position: 40 }]
+    @EndUserText.label: 'Ticket Direction'
+    TicketDirection;
+    @UI.fieldGroup: [{ qualifier: 'TravelData', position: 50 }]
+    @EndUserText.label: 'Travel Destination'
+    TravelDestination;
+    @UI.fieldGroup: [{ qualifier: 'TravelData', position: 60 }]
+    @EndUserText.label: 'Journey Route'
+    JourneyRoute;
+      @UI: { lineItem:       [ { position: 60, importance: #HIGH } ]  }
+         @UI.fieldGroup: [{ qualifier: 'TravelData', position: 70 }]
+         @EndUserText.label: 'Remarks'
+         @UI.multiLineText: true
+    Remarks;
+               @UI: {
+         selectionField: [ { position: 50 } ] }
+         @EndUserText.label: 'Status'
+    ReqStatus;
+    @UI: { lineItem:       [ { position: 70, importance: #HIGH ,criticality: 'statusCriticality'} ]}
+    @UI.dataPoint: { qualifier: 'ReqStatus',title: 'Request Status',criticality: 'statusCriticality'}
+    @EndUserText.label: 'Status'
+    ReqStatusText;
+    @UI.hidden: true
+    LocalCreatedBy;
+    @UI.identification: [{  position: 60}]
+    LocalCreatedAt;
+    @UI.hidden: true
+    LocalLastChangedBy;
+    @UI.identification: [{  position: 70}]
+    LocalLastChangedAt;
+    @UI.hidden: true
+    LastChangedAt;
+}

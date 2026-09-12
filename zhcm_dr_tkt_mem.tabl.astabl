@@ -7,7 +7,8 @@ define table zhcm_dr_tkt_mem {
 
   key client       : mandt not null;
   key request_uuid : sysuuid_x16 not null;
-  key family_seq   : abap.int1 not null;
+  key family_uuid  : sysuuid_x16 not null;
+  family_seq       : abap.int1;
   selected         : boolean;
   name             : char200;
   gbdat            : gbdat;

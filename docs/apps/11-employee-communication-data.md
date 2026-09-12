@@ -123,6 +123,11 @@ Same shape as every other app in the suite: `strict(2)`, `with draft`, `with add
   numbers were needed for this app.
 * **`get_instance_features`** (root, `_Attachment`, `_Approval`) — same draft-gated
   update/delete pattern as every other app; `Pernr`/`PlansTxt`/`OrgehTxt`/`RequestId` read-only.
+  The `_Attachment`/`_Approval` handlers build their `result` row via a single `APPEND VALUE #(
+  %tky = ... )` rather than appending-then-patching through a `result[ %key = ... ]` table
+  expression on an empty table — the latter pattern raises `CX_SY_ITAB_LINE_NOT_FOUND`
+  (`ITAB_LINE_NOT_FOUND`) the first time it's actually exercised; the same defect was found and
+  fixed in Tickets Request's equivalent handlers and applied here too.
 
 ## Save / submit flow (`lsc_zhcm_i_ecd~save_modified`, additional save)
 

@@ -27,14 +27,14 @@
     <DD07V>
      <VALPOS>0003</VALPOS>
      <DDLANGUAGE>E</DDLANGUAGE>
-     <DOMVALUE_L>03</DOMVALUE_L>
-     <DDTEXT>Tickets Request</DDTEXT>
+     <DOMVALUE_L>04</DOMVALUE_L>
+     <DDTEXT>Employee Communication Data</DDTEXT>
     </DD07V>
     <DD07V>
      <VALPOS>0004</VALPOS>
      <DDLANGUAGE>E</DDLANGUAGE>
-     <DOMVALUE_L>04</DOMVALUE_L>
-     <DDTEXT>Employee Communication Data</DDTEXT>
+     <DOMVALUE_L>07</DOMVALUE_L>
+     <DDTEXT>Tickets Request</DDTEXT>
     </DD07V>
    </DD07V_TAB>
   </asx:values>

@@ -52,7 +52,7 @@ case app_id.
 MODIFY zhcm_lr_approv FROM TABLE approvals_it.
 when '02'.
 MODIFY zhcm_ov_approv FROM TABLE approvals_it.
-when '03'.
+when '07'.
 MODIFY zhcm_tick_approv FROM TABLE approvals_it.
 when '04'.
 MODIFY zhcm_ecd_approv FROM TABLE approvals_it.
@@ -65,7 +65,7 @@ case app_id.
   delete from zhcm_lr_approv WHERE request_uuid = @requestuuid.
   when '02'.
     delete from zhcm_ov_approv WHERE request_uuid = @requestuuid.
-  when '03'.
+  when '07'.
     delete from zhcm_tick_approv WHERE request_uuid = @requestuuid.
   when '04'.
     delete from zhcm_ecd_approv WHERE request_uuid = @requestuuid.

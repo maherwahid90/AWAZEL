@@ -132,8 +132,8 @@ Domain **`ZHCM_APP_ID`** identifies *which* request type a generic FM/table row 
 |-------|-------------|
 | `01` | Leave Request |
 | `02` | Overtime Request |
-| `03` | Tickets Request |
 | `04` | Employee Communication Data |
+| `07` | Tickets Request (renumbered from the original `03` once other apps claimed `03`/`05`/`06`) |
 
 **When adding a new request-type app, register a new value here first** — the whole approval
 engine (`ZHCM_UPDATE_APPROVALS`, `ZHCM_GET_APPROVALS_IN_USER_DEC`) branches on `APP_ID`.
